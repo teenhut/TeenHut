@@ -34,3 +34,4 @@ build_log*.txt
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+-1.14-windows.xml

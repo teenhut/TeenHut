@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const next = require("next");
 const http = require("http");
@@ -10,13 +11,7 @@ const app = next({ dev });
 const handle = app.getRequestHandler();
 
 // MongoDB Connection
-const MONGODB_URI =
-  process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/teenhut";
-
-mongoose
-  .connect(MONGODB_URI)
-  .then(() => console.log("Connected to MongoDB"))
-  .catch((err) => console.error("Could not connect to MongoDB", err));
+// MongoDB Connection moved inside app.prepare()
 
 // User Schema
 const userSchema = new mongoose.Schema({
@@ -177,7 +172,43 @@ app.prepare().then(() => {
   };
 
   // Run migration on startup
-  migrateLegacyHypes();
+  // Run migration on startup - MOVED to mongoose.connect
+  // migrateLegacyHypes();
+
+  // MongoDB Connection
+  const MONGODB_URI = process.env.MONGODB_URI;
+
+  if (!MONGODB_URI) {
+    console.error("FATAL ERROR: MONGODB_URI is not defined in .env file");
+    process.exit(1);
+  }
+
+  console.log("---------------------------------------------------");
+  console.log("DEBUG: NODE_ENV is", process.env.NODE_ENV);
+  console.log(
+    "DEBUG: MONGODB_URI is",
+    MONGODB_URI.substring(0, 15) + "..." // Log start of URI for verification
+  );
+  console.log("---------------------------------------------------");
+
+  const clientOptions = {
+    serverApi: { version: "1", strict: true, deprecationErrors: true },
+  };
+
+  mongoose
+    .connect(MONGODB_URI, clientOptions)
+    .then(() => {
+      console.log("Connected to MongoDB Atlas");
+      migrateLegacyHypes(); // Run migration only after connection
+    })
+    .catch((err) => {
+      console.error("---------------------------------------------------");
+      console.error("Could not connect to MongoDB Atlas");
+      console.error("Error Name:", err.name);
+      console.error("Error Code:", err.code);
+      console.error("Error Message:", err.message);
+      console.error("---------------------------------------------------");
+    });
 
   // Manual Fix Endpoint
   server.get("/api/fix-data", async (req, res) => {
