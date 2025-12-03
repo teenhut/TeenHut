@@ -32,7 +32,7 @@ export default function LeaderboardPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-white text-black font-sans">
+    <main className="min-h-screen bg-white text-primary font-sans">
       <div className="container mx-auto px-4 py-12 max-w-3xl">
         <h1 className="text-5xl font-bold text-center mb-8">Leaderboard</h1>
 

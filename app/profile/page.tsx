@@ -41,10 +41,10 @@ export default function ProfilePage() {
   }, [user?.id]);
 
   return (
-    <main className="min-h-screen bg-white text-black font-sans">
+    <main className="min-h-screen bg-white text-primary font-sans">
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-end mb-8">
-          <div className="bg-black/5 border border-black/10 rounded-xl p-4 text-right">
+          <div className="bg-primary/5 border border-primary/10 rounded-xl p-4 text-right">
             <div className="font-bold text-xl mb-1">
               ★ Credits: {user?.credits || 0} XP
             </div>
@@ -61,12 +61,12 @@ export default function ProfilePage() {
         </h1>
 
         <div className="flex justify-center gap-4 mb-12">
-          <Button className="bg-black text-white hover:bg-gray-800 px-8 font-bold rounded-full">
+          <Button className="bg-primary text-white hover:bg-primary/90 px-8 font-bold rounded-full">
             Hypes
           </Button>
           <Button
             variant="ghost"
-            className="text-gray-600 hover:text-black hover:bg-black/5 px-8 rounded-full"
+            className="text-gray-600 hover:text-primary hover:bg-primary/5 px-8 rounded-full"
             onClick={() => setShowUploadModal(true)}
           >
             Upload
@@ -74,7 +74,7 @@ export default function ProfilePage() {
           <Link href="/analytics">
             <Button
               variant="ghost"
-              className="text-gray-600 hover:text-black hover:bg-black/5 px-8 rounded-full"
+              className="text-gray-600 hover:text-primary hover:bg-primary/5 px-8 rounded-full"
             >
               Analytics
             </Button>
@@ -85,7 +85,7 @@ export default function ProfilePage() {
           {hypes.map((hype) => (
             <div key={hype._id} className="flex flex-col gap-2">
               <Link href={`/hypes/${hype._id}`}>
-                <div className="bg-black/5 border border-black/10 aspect-9/16 rounded-xl flex items-center justify-center relative group cursor-pointer hover:bg-black/10 transition-colors overflow-hidden">
+                <div className="bg-primary/5 border border-primary/10 aspect-9/16 rounded-xl flex items-center justify-center relative group cursor-pointer hover:bg-primary/10 transition-colors overflow-hidden">
                   {hype.mediaType === "video" ? (
                     <video
                       src={hype.mediaUrl}
@@ -100,7 +100,7 @@ export default function ProfilePage() {
                     />
                   )}
                   {hype.mediaType !== "video" && (
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-primary/20">
                       <Play className="w-12 h-12 text-white fill-white" />
                     </div>
                   )}
@@ -122,7 +122,7 @@ export default function ProfilePage() {
           {/* Upload Button Card */}
           <div className="flex items-end">
             <Button
-              className="w-full h-[calc(100%-2rem)] aspect-9/16 md:aspect-auto md:h-auto py-8 bg-transparent border-2 border-dashed border-black/20 text-gray-600 hover:text-black hover:border-black hover:bg-black/5 rounded-xl text-xl font-bold transition-all"
+              className="w-full h-[calc(100%-2rem)] aspect-9/16 md:aspect-auto md:h-auto py-8 bg-transparent border-2 border-dashed border-primary/20 text-gray-600 hover:text-primary hover:border-primary hover:bg-primary/5 rounded-xl text-xl font-bold transition-all"
               onClick={() => setShowUploadModal(true)}
             >
               + Upload Hype
@@ -131,7 +131,7 @@ export default function ProfilePage() {
         </div>
 
         <div className="text-center flex items-center justify-center gap-2 text-gray-600 font-bold">
-          <Flame className="w-5 h-5 text-black fill-black" />
+          <Flame className="w-5 h-5 text-primary fill-primary" />
           Creators earn extra XP for daily uploads
         </div>
       </div>

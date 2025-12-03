@@ -82,11 +82,11 @@ export default function ChallengesPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-white text-black font-sans">
+    <main className="min-h-screen bg-white text-primary font-sans">
       <div className="container mx-auto px-4 py-12 max-w-4xl">
         <h1 className="text-5xl font-bold text-center mb-8">Challenges</h1>
 
-        <div className="bg-black text-white rounded-2xl p-8 mb-12 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="bg-primary text-white rounded-2xl p-8 mb-12 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="text-center md:text-left">
             <div className="text-gray-400 text-sm uppercase tracking-wider font-bold mb-1">
               Current Balance
@@ -95,7 +95,7 @@ export default function ChallengesPage() {
               {currentXP.toLocaleString()} XP
             </div>
           </div>
-          <div className="flex items-center gap-4 bg-gray-800 rounded-xl p-4">
+          <div className="flex items-center gap-4 bg-primary/20 rounded-xl p-4">
             <Flame className="w-8 h-8 text-orange-500 fill-orange-500" />
             <div>
               <div className="font-bold text-2xl">{streak} Days</div>
@@ -146,7 +146,7 @@ export default function ChallengesPage() {
                   ) : (
                     <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
                       <div
-                        className="bg-black h-full rounded-full transition-all duration-1000"
+                        className="bg-primary h-full rounded-full transition-all duration-1000"
                         style={{ width: `${progress}%` }}
                       />
                     </div>

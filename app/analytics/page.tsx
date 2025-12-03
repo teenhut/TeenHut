@@ -23,12 +23,12 @@ export default function AnalyticsPage() {
   }, [user?.id]);
 
   return (
-    <main className="min-h-screen bg-white text-black font-sans p-8">
+    <main className="min-h-screen bg-white text-primary font-sans p-8">
       <div className="max-w-5xl mx-auto">
         <h1 className="text-4xl font-bold mb-8">Analytics</h1>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          <div className="bg-black/5 p-6 rounded-2xl border border-black/10">
+          <div className="bg-primary/5 p-6 rounded-2xl border border-primary/10">
             <div className="flex items-center gap-3 mb-2 text-gray-600">
               <Eye className="w-5 h-5" />
               <span className="font-bold">Total Views</span>
@@ -39,7 +39,7 @@ export default function AnalyticsPage() {
             </div>
           </div>
 
-          <div className="bg-black/5 p-6 rounded-2xl border border-black/10">
+          <div className="bg-primary/5 p-6 rounded-2xl border border-primary/10">
             <div className="flex items-center gap-3 mb-2 text-gray-600">
               <Heart className="w-5 h-5" />
               <span className="font-bold">Total Likes</span>
@@ -48,7 +48,7 @@ export default function AnalyticsPage() {
             <div className="text-sm text-gray-500 font-bold mt-1">Lifetime</div>
           </div>
 
-          <div className="bg-black/5 p-6 rounded-2xl border border-black/10">
+          <div className="bg-primary/5 p-6 rounded-2xl border border-primary/10">
             <div className="flex items-center gap-3 mb-2 text-gray-600">
               <Users className="w-5 h-5" />
               <span className="font-bold">Followers</span>
@@ -59,7 +59,7 @@ export default function AnalyticsPage() {
             </div>
           </div>
 
-          <div className="bg-black/5 p-6 rounded-2xl border border-black/10">
+          <div className="bg-primary/5 p-6 rounded-2xl border border-primary/10">
             <div className="flex items-center gap-3 mb-2 text-gray-600">
               <TrendingUp className="w-5 h-5" />
               <span className="font-bold">Engagement</span>
@@ -69,7 +69,7 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
-        <div className="bg-black/5 p-8 rounded-3xl border border-black/10 h-96 flex items-center justify-center flex-col text-gray-500">
+        <div className="bg-primary/5 p-8 rounded-3xl border border-primary/10 h-96 flex items-center justify-center flex-col text-gray-500">
           <BarChart3 className="w-16 h-16 mb-4 opacity-50" />
           <p className="font-bold text-lg">Detailed charts coming soon</p>
         </div>

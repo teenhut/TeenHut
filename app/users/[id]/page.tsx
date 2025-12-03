@@ -116,13 +116,13 @@ export default function PublicProfilePage() {
     );
 
   return (
-    <main className="min-h-screen bg-white text-black font-sans">
+    <main className="min-h-screen bg-white text-primary font-sans">
       <div className="container mx-auto px-4 py-8">
         {/* Profile Header */}
         <div className="flex flex-col items-center mb-12">
           <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-teal-400 to-blue-500 p-[3px] mb-4">
             <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
-              <span className="text-4xl font-bold text-black uppercase">
+              <span className="text-4xl font-bold text-primary uppercase">
                 {profile.username[0]}
               </span>
             </div>
@@ -152,8 +152,8 @@ export default function PublicProfilePage() {
               onClick={handleFollow}
               className={`rounded-full px-8 ${
                 isFollowing
-                  ? "bg-gray-200 text-black hover:bg-gray-300"
-                  : "bg-black text-white hover:bg-gray-800"
+                  ? "bg-gray-200 text-primary hover:bg-gray-300"
+                  : "bg-primary text-white hover:bg-primary/90"
               }`}
             >
               {isFollowing ? "Following" : "Follow"}
@@ -168,7 +168,7 @@ export default function PublicProfilePage() {
           {hypes.map((hype) => (
             <div key={hype._id} className="flex flex-col gap-2">
               <Link href={`/hypes/${hype._id}`}>
-                <div className="bg-black/5 border border-black/10 aspect-9/16 rounded-xl flex items-center justify-center relative group cursor-pointer hover:bg-black/10 transition-colors overflow-hidden">
+                <div className="bg-primary/5 border border-primary/10 aspect-9/16 rounded-xl flex items-center justify-center relative group cursor-pointer hover:bg-primary/10 transition-colors overflow-hidden">
                   {hype.mediaType === "video" ? (
                     <video
                       src={hype.mediaUrl}
@@ -181,7 +181,7 @@ export default function PublicProfilePage() {
                       className="w-full h-full object-cover"
                     />
                   )}
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-primary/20">
                     <Play className="w-12 h-12 text-white fill-white" />
                   </div>
                 </div>

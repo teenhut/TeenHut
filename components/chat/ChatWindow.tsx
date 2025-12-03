@@ -278,7 +278,7 @@ export default function ChatWindow({ chatId }: { chatId: string }) {
     <div className="flex-grow flex flex-col h-full bg-white">
       {/* Header */}
       <div className="p-6 border-b border-gray-200">
-        <h1 className="text-3xl font-bold text-black">TeenHut Chats</h1>
+        <h1 className="text-3xl font-bold text-primary">TeenHut Chats</h1>
       </div>
 
       {/* Messages */}
@@ -386,7 +386,7 @@ export default function ChatWindow({ chatId }: { chatId: string }) {
                 <div
                   className={`px-6 py-3 rounded-2xl text-lg relative ${
                     msg.sender === "me"
-                      ? "bg-black text-white rounded-tr-none"
+                      ? "bg-primary text-white rounded-tr-none"
                       : "bg-gray-100 text-black rounded-tl-none"
                   }`}
                 >
@@ -539,7 +539,7 @@ export default function ChatWindow({ chatId }: { chatId: string }) {
           <input
             type="text"
             placeholder="Type a message..."
-            className="flex-grow bg-transparent border-0 focus:ring-0 text-black placeholder:text-gray-400 px-4 py-2"
+            className="flex-grow bg-transparent border-0 focus:ring-0 text-primary placeholder:text-gray-400 px-4 py-2"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && sendMessage()}
@@ -551,7 +551,7 @@ export default function ChatWindow({ chatId }: { chatId: string }) {
               </div>
             )}
             <button
-              className="p-2 text-gray-400 hover:text-black"
+              className="p-2 text-gray-400 hover:text-primary"
               onClick={() => setShowEmojiPicker(!showEmojiPicker)}
             >
               <Smile className="w-6 h-6" />
@@ -564,7 +564,7 @@ export default function ChatWindow({ chatId }: { chatId: string }) {
               accept="image/*,video/*"
             />
             <button
-              className="p-2 text-gray-400 hover:text-black"
+              className="p-2 text-gray-400 hover:text-primary"
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploading}
             >
@@ -574,7 +574,7 @@ export default function ChatWindow({ chatId }: { chatId: string }) {
             </button>
             <Button
               onClick={() => sendMessage()}
-              className="bg-black hover:bg-gray-800 text-white rounded-xl px-6"
+              className="bg-primary hover:bg-primary/90 text-white rounded-xl px-6"
               disabled={isUploading}
             >
               {isUploading ? "..." : "Send"}

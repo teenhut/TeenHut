@@ -171,7 +171,7 @@ export default function ReelCard({
 
   return (
     <>
-      <div className="relative h-[90vh] aspect-[9/16] snap-center shrink-0 rounded-2xl overflow-hidden bg-[#000000] mb-8 mx-auto">
+      <div className="relative h-[90vh] aspect-[9/16] snap-center shrink-0 rounded-2xl overflow-hidden bg-primary mb-8 mx-auto">
         {/* Blurred Background Layer */}
         <div className="absolute inset-0 z-0">
           {mediaType === "video" ? (
@@ -189,7 +189,7 @@ export default function ReelCard({
               className="w-full h-full object-cover blur-xl opacity-50 scale-110"
             />
           )}
-          <div className="absolute inset-0 bg-[#000000]/40" />
+          <div className="absolute inset-0 bg-primary/40" />
         </div>
 
         {/* Media Content */}
@@ -209,14 +209,14 @@ export default function ReelCard({
               />
               {/* Play/Pause Overlay */}
               {(!isActive || manualPause) && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/20 z-20">
+                <div className="absolute inset-0 flex items-center justify-center bg-primary/20 z-20">
                   <Play className="w-16 h-16 text-white opacity-50" />
                 </div>
               )}
 
               {/* Persistent Mute Icon (Bottom Right) - Clickable */}
               <div
-                className="absolute bottom-4 right-4 p-2 bg-black/50 rounded-full text-white z-30 cursor-pointer hover:bg-black/70 transition-colors"
+                className="absolute bottom-4 right-4 p-2 bg-primary/50 rounded-full text-white z-30 cursor-pointer hover:bg-primary/70 transition-colors"
                 onClick={toggleMute}
               >
                 {isGlobalMuted ? (
@@ -234,7 +234,7 @@ export default function ReelCard({
             />
           )}
           {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#000000]/20 via-transparent to-[#000000]/80 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/20 via-transparent to-primary/80 pointer-events-none" />
         </div>
 
         {/* Right Side Actions */}
@@ -244,7 +244,7 @@ export default function ReelCard({
               size="icon"
               variant="ghost"
               onClick={handleLike}
-              className="w-12 h-12 rounded-full bg-[#000000]/40 hover:bg-white/20 text-white backdrop-blur-sm"
+              className="w-12 h-12 rounded-full bg-primary/40 hover:bg-white/20 text-white backdrop-blur-sm"
             >
               <Heart
                 className={`w-6 h-6 ${
@@ -260,7 +260,7 @@ export default function ReelCard({
               size="icon"
               variant="ghost"
               onClick={handleComment}
-              className="w-12 h-12 rounded-full bg-[#000000]/40 hover:bg-white/20 text-white backdrop-blur-sm"
+              className="w-12 h-12 rounded-full bg-primary/40 hover:bg-white/20 text-white backdrop-blur-sm"
             >
               <MessageCircle className="w-6 h-6" />
             </Button>
@@ -274,7 +274,7 @@ export default function ReelCard({
               size="icon"
               variant="ghost"
               onClick={handleShare}
-              className="w-12 h-12 rounded-full bg-[#000000]/40 hover:bg-white/20 text-white backdrop-blur-sm"
+              className="w-12 h-12 rounded-full bg-primary/40 hover:bg-white/20 text-white backdrop-blur-sm"
             >
               <Share2 className="w-6 h-6" />
             </Button>
@@ -284,7 +284,7 @@ export default function ReelCard({
           <Button
             size="icon"
             variant="ghost"
-            className="w-12 h-12 rounded-full bg-[#000000]/40 hover:bg-white/20 text-white backdrop-blur-sm"
+            className="w-12 h-12 rounded-full bg-primary/40 hover:bg-white/20 text-white backdrop-blur-sm"
           >
             <MoreVertical className="w-6 h-6" />
           </Button>
@@ -294,7 +294,7 @@ export default function ReelCard({
         <div className="absolute left-0 bottom-0 right-16 p-6 z-30 text-white">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-teal-400 to-blue-500 p-[2px]">
-              <div className="w-full h-full rounded-full bg-[#000000] flex items-center justify-center font-bold text-sm">
+              <div className="w-full h-full rounded-full bg-primary flex items-center justify-center font-bold text-sm">
                 {author[0]}
               </div>
             </div>
@@ -309,7 +309,7 @@ export default function ReelCard({
               size="sm"
               className={`h-7 ml-2 rounded-full px-4 ${
                 isFollowing
-                  ? "bg-white text-black"
+                  ? "bg-white text-primary"
                   : "border-white/30 bg-white/10 hover:bg-white/20 text-white"
               }`}
               onClick={handleFollow}

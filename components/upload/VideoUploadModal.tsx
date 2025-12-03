@@ -3,30 +3,32 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Upload, X, CheckCircle } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
-interface UploadModalProps {
+interface VideoUploadModalProps {
   isOpen: boolean;
   onClose: () => void;
   onUploadSuccess: () => void;
 }
 
-import { useAuth } from "@/context/AuthContext";
-
-export default function UploadModal({
+export default function VideoUploadModal({
   isOpen,
   onClose,
   onUploadSuccess,
-}: UploadModalProps) {
+}: VideoUploadModalProps) {
   const { user } = useAuth();
   const [step, setStep] = useState(1); // 1: Select, 2: Details
   const [dragActive, setDragActive] = useState(false);
   const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const [uploadTitle, setUploadTitle] = useState("");
   const [uploadDescription, setUploadDescription] = useState("");
   const [isUploading, setIsUploading] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const thumbnailInputRef = useRef<HTMLInputElement>(null);
 
   if (!isOpen) return null;
 
@@ -56,7 +58,24 @@ export default function UploadModal({
     }
   };
 
+  const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setThumbnailFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setThumbnailPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleFile = (file: File) => {
+    if (!file.type.startsWith("video/")) {
+      alert("Please upload a video file.");
+      return;
+    }
     setUploadFile(file);
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -71,13 +90,19 @@ export default function UploadModal({
 
     setIsUploading(true);
     const formData = new FormData();
-    formData.append("file", uploadFile);
+    formData.append("video", uploadFile);
+    if (thumbnailFile) {
+      formData.append("thumbnail", thumbnailFile);
+    }
     formData.append("title", uploadTitle);
-    formData.append("author", user?.username || "Anonymous");
+    formData.append("description", uploadDescription);
     formData.append("userId", user?.id || "");
 
+    // Get duration (mock for now, or extract from video element if possible)
+    formData.append("duration", "00:00");
+
     try {
-      const res = await fetch("/api/hypes", {
+      const res = await fetch("/api/videos/upload", {
         method: "POST",
         body: formData,
       });
@@ -99,7 +124,9 @@ export default function UploadModal({
   const resetUpload = () => {
     setStep(1);
     setUploadFile(null);
+    setThumbnailFile(null);
     setFilePreview(null);
+    setThumbnailPreview(null);
     setUploadTitle("");
     setUploadDescription("");
     setIsUploading(false);
@@ -112,7 +139,7 @@ export default function UploadModal({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h2 className="text-xl font-bold">
-            {step === 1 ? "Upload videos" : `${uploadTitle || "Draft"}`}
+            {step === 1 ? "Upload Video" : `${uploadTitle || "Draft"}`}
           </h2>
           <div className="flex items-center gap-4">
             <Button
@@ -146,7 +173,7 @@ export default function UploadModal({
                 Drag and drop video files to upload
               </h3>
               <p className="text-gray-500 text-sm mb-8">
-                Your videos will be private until you publish them.
+                Your videos will be public.
               </p>
 
               <Button
@@ -159,7 +186,7 @@ export default function UploadModal({
                 ref={fileInputRef}
                 type="file"
                 className="hidden"
-                accept="image/*,video/*"
+                accept="video/*"
                 onChange={handleChange}
               />
             </div>
@@ -198,25 +225,49 @@ export default function UploadModal({
                     />
                   </div>
                 </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    Thumbnail
+                  </label>
+                  <div
+                    className="border-2 border-dashed border-gray-300 rounded-md p-4 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50"
+                    onClick={() => thumbnailInputRef.current?.click()}
+                  >
+                    {thumbnailPreview ? (
+                      <img
+                        src={thumbnailPreview}
+                        alt="Thumbnail"
+                        className="h-32 object-cover rounded"
+                      />
+                    ) : (
+                      <div className="text-center">
+                        <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                        <span className="text-sm text-gray-500">
+                          Upload Thumbnail
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <input
+                    ref={thumbnailInputRef}
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleThumbnailChange}
+                  />
+                </div>
               </div>
 
               {/* Right: Preview */}
               <div className="w-full lg:w-1/3 bg-gray-50 p-6 border-l border-gray-200 flex flex-col">
-                <div className="aspect-9/16 bg-black rounded-lg overflow-hidden mb-4 relative shadow-md">
+                <div className="aspect-video bg-black rounded-lg overflow-hidden mb-4 relative shadow-md">
                   {filePreview ? (
-                    uploadFile?.type.startsWith("video") ? (
-                      <video
-                        src={filePreview}
-                        controls
-                        className="w-full h-full object-contain"
-                      />
-                    ) : (
-                      <img
-                        src={filePreview}
-                        alt="Preview"
-                        className="w-full h-full object-contain"
-                      />
-                    )
+                    <video
+                      src={filePreview}
+                      controls
+                      className="w-full h-full object-contain"
+                    />
                   ) : (
                     <div className="flex items-center justify-center h-full text-gray-500">
                       Generating preview...
@@ -225,12 +276,6 @@ export default function UploadModal({
                 </div>
 
                 <div className="space-y-4">
-                  <div className="flex justify-between text-sm text-gray-500">
-                    <span>Video Link</span>
-                    <span className="text-blue-600 cursor-pointer">
-                      https://teenhut.com/v/...
-                    </span>
-                  </div>
                   <div className="flex justify-between text-sm text-gray-500">
                     <span>Filename</span>
                     <span className="truncate max-w-[150px]">

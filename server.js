@@ -10,25 +10,34 @@ const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
 const handle = app.getRequestHandler();
 
-// MongoDB Connection
-// MongoDB Connection moved inside app.prepare()
+// Nodemailer Configuration
+const nodemailer = require("nodemailer");
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
 
 // User Schema
 const userSchema = new mongoose.Schema({
   email: { type: String, unique: true, required: true },
   username: { type: String, required: true },
   password: { type: String, required: true },
-  // role: { type: String, default: "explorer" }, // Role removed
+  isVerified: { type: Boolean, default: false },
   credits: { type: Number, default: 0 },
   streak: { type: Number, default: 0 },
   lastLogin: { type: Date },
+  twoFactorCode: { type: String },
+  twoFactorExpires: { type: Date },
   stats: {
     commentsMade: { type: Number, default: 0 },
     hypesUploaded: { type: Number, default: 0 },
     likesGiven: { type: Number, default: 0 },
     messagesSent: { type: Number, default: 0 },
   },
-  completedChallenges: [{ type: String }], // Array of Challenge IDs
+  completedChallenges: [{ type: String }],
   followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   following: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 });
@@ -103,6 +112,39 @@ app.prepare().then(() => {
 
   const Message =
     mongoose.models.Message || mongoose.model("Message", messageSchema);
+
+  // Video Schema
+  const videoSchema = new mongoose.Schema({
+    title: { type: String, required: true },
+    description: { type: String },
+    videoUrl: { type: String, required: true },
+    thumbnailUrl: { type: String },
+    views: { type: Number, default: 0 },
+    likes: { type: Number, default: 0 },
+    duration: { type: String },
+    uploader: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    createdAt: { type: Date, default: Date.now },
+  });
+
+  const Video = mongoose.models.Video || mongoose.model("Video", videoSchema);
+
+  // Conversation Schema
+  const conversationSchema = new mongoose.Schema({
+    participants: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    lastMessage: {
+      text: String,
+      senderName: String,
+      timestamp: Date,
+    },
+    name: { type: String }, // For group chats
+    isGroup: { type: Boolean, default: false },
+    admin: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    updatedAt: { type: Date, default: Date.now },
+  });
+
+  const Conversation =
+    mongoose.models.Conversation ||
+    mongoose.model("Conversation", conversationSchema);
 
   // Helper: Check Challenges
   const checkChallenges = async (user) => {
@@ -235,6 +277,21 @@ app.prepare().then(() => {
       return res.status(400).json({ error: "Missing fields" });
     }
 
+    // Email Domain Validation
+    const allowedDomains = [
+      "gmail.com",
+      "outlook.com",
+      "hotmail.com",
+      "live.com",
+      "msn.com",
+    ];
+    const emailDomain = email.split("@")[1];
+    if (!allowedDomains.includes(emailDomain)) {
+      return res.status(400).json({
+        error: "Only Gmail and Microsoft accounts are allowed.",
+      });
+    }
+
     try {
       const existingUser = await User.findOne({ email });
       if (existingUser) {
@@ -242,10 +299,18 @@ app.prepare().then(() => {
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Generate 2FA code
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      const twoFactorExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+
       const newUser = new User({
         email,
         username,
         password: hashedPassword,
+        isVerified: false,
+        twoFactorCode: code,
+        twoFactorExpires,
         credits: 0,
         streak: 1, // Start with 1 day streak
         lastLogin: new Date(),
@@ -253,13 +318,27 @@ app.prepare().then(() => {
 
       await newUser.save();
 
-      res.json({
-        id: newUser._id,
-        email: newUser.email,
-        username: newUser.username,
-        credits: newUser.credits,
-        streak: newUser.streak,
-      });
+      // Send Email
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "Teen Hut Verification Code",
+        text: `Your verification code is: ${code}`,
+      };
+
+      if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+        transporter.sendMail(mailOptions, (error, info) => {
+          if (error) {
+            console.log("Error sending email:", error);
+          } else {
+            console.log("Email sent:", info.response);
+          }
+        });
+      } else {
+        console.log(`DEBUG: Verification Code for ${email} is ${code}`);
+      }
+
+      res.json({ requires2FA: true, email: newUser.email });
     } catch (error) {
       console.error("Signup error:", error);
       res.status(500).json({ error: "Server error" });
@@ -281,7 +360,68 @@ app.prepare().then(() => {
 
       const match = await bcrypt.compare(password, user.password);
       if (match) {
-        // Streak Logic
+        // Generate 2FA Code
+        const code = Math.floor(100000 + Math.random() * 900000).toString();
+        user.twoFactorCode = code;
+        user.twoFactorExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+        await user.save();
+
+        // Send Email
+        const mailOptions = {
+          from: process.env.EMAIL_USER,
+          to: user.email,
+          subject: "Your 2FA Code - TeenHut",
+          text: `Your verification code is: ${code}`,
+        };
+
+        if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+          transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+              console.log("Error sending email:", error);
+            } else {
+              console.log("Email sent: " + info.response);
+            }
+          });
+        } else {
+          console.log("---------------------------------------------------");
+          console.log(`DEBUG: 2FA Code for ${user.email} is ${code}`);
+          console.log(
+            "Configure EMAIL_USER and EMAIL_PASS to send real emails."
+          );
+          console.log("---------------------------------------------------");
+        }
+
+        res.json({ requires2FA: true, email: user.email });
+      } else {
+        res.status(401).json({ error: "Invalid credentials" });
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  });
+
+  // Verify 2FA Endpoint
+  server.post("/api/verify-2fa", async (req, res) => {
+    const { email, code } = req.body;
+
+    if (!email || !code) {
+      return res.status(400).json({ error: "Missing fields" });
+    }
+
+    try {
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      if (user.twoFactorCode === code && user.twoFactorExpires > Date.now()) {
+        // Success
+        user.twoFactorCode = undefined;
+        user.twoFactorExpires = undefined;
+        user.isVerified = true; // Mark user as verified
+
+        // Streak Logic (Moved here from login)
         const now = new Date();
         const lastLogin = user.lastLogin ? new Date(user.lastLogin) : null;
 
@@ -290,33 +430,32 @@ app.prepare().then(() => {
           const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
           if (diffDays === 1) {
-            // Consecutive day
             user.streak += 1;
           } else if (diffDays > 1) {
-            // Broken streak
             user.streak = 1;
           }
-          // If diffDays === 0 (same day), do nothing
         } else {
           user.streak = 1;
         }
 
         user.lastLogin = now;
         await user.save();
-        await checkChallenges(user); // Check streak challenges
+        await checkChallenges(user);
 
+        // Return user data AND isVerified flag
         res.json({
           id: user._id,
           email: user.email,
           username: user.username,
           credits: user.credits,
           streak: user.streak,
+          isVerified: true,
         });
       } else {
-        res.status(401).json({ error: "Invalid credentials" });
+        res.status(400).json({ error: "Invalid or expired code" });
       }
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("2FA Verification error:", error);
       res.status(500).json({ error: "Server error" });
     }
   });
@@ -432,6 +571,156 @@ app.prepare().then(() => {
     } catch (error) {
       console.error("Chat upload error:", error);
       res.status(500).json({ error: "Upload failed" });
+    }
+  });
+
+  // Get All Users (for Chat Selection)
+  server.get("/api/users", async (req, res) => {
+    try {
+      const users = await User.find({}, "username email");
+      res.json(users);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch users" });
+    }
+  });
+
+  // Create Conversation
+  server.post("/api/conversations", async (req, res) => {
+    try {
+      const { participantIds, name, isGroup, adminId } = req.body;
+
+      if (!participantIds || participantIds.length === 0) {
+        return res.status(400).json({ error: "Participants required" });
+      }
+
+      // Check for existing 1-on-1 conversation
+      if (!isGroup && participantIds.length === 2) {
+        const existingConv = await Conversation.findOne({
+          isGroup: false,
+          participants: { $all: participantIds },
+        });
+        if (existingConv) {
+          return res.json(existingConv);
+        }
+      }
+
+      const newConv = new Conversation({
+        participants: participantIds,
+        name,
+        isGroup,
+        admin: adminId,
+        updatedAt: new Date(),
+      });
+
+      await newConv.save();
+
+      // Populate participants for immediate UI update
+      await newConv.populate("participants", "username");
+
+      res.json(newConv);
+    } catch (error) {
+      console.error("Create conversation error:", error);
+      res.status(500).json({ error: "Failed to create conversation" });
+    }
+  });
+
+  // Get User Conversations
+  server.get("/api/conversations", async (req, res) => {
+    try {
+      const { userId } = req.query;
+      if (!userId) return res.status(400).json({ error: "User ID required" });
+
+      const conversations = await Conversation.find({
+        participants: userId,
+      })
+        .populate("participants", "username")
+        .sort({ updatedAt: -1 });
+
+      res.json(conversations);
+    } catch (error) {
+      console.error("Fetch conversations error:", error);
+      res.status(500).json({ error: "Failed to fetch conversations" });
+    }
+  });
+
+  // Video Upload Endpoint
+  server.post(
+    "/api/videos/upload",
+    upload.fields([{ name: "video" }, { name: "thumbnail" }]),
+    async (req, res) => {
+      try {
+        const { title, description, duration, userId } = req.body;
+        const videoFile = req.files["video"] ? req.files["video"][0] : null;
+        const thumbnailFile = req.files["thumbnail"]
+          ? req.files["thumbnail"][0]
+          : null;
+
+        if (!videoFile) {
+          return res.status(400).json({ error: "No video file uploaded" });
+        }
+
+        // Upload Video
+        const videoB64 = Buffer.from(videoFile.buffer).toString("base64");
+        const videoDataURI =
+          "data:" + videoFile.mimetype + ";base64," + videoB64;
+        const videoResult = await cloudinary.uploader.upload(videoDataURI, {
+          resource_type: "video",
+          folder: "teenhut_videos",
+        });
+
+        // Upload Thumbnail (Optional)
+        let thumbnailUrl = "";
+        if (thumbnailFile) {
+          const thumbB64 = Buffer.from(thumbnailFile.buffer).toString("base64");
+          const thumbDataURI =
+            "data:" + thumbnailFile.mimetype + ";base64," + thumbB64;
+          const thumbResult = await cloudinary.uploader.upload(thumbDataURI, {
+            resource_type: "image",
+            folder: "teenhut_thumbnails",
+          });
+          thumbnailUrl = thumbResult.secure_url;
+        }
+
+        const newVideo = new Video({
+          title,
+          description,
+          videoUrl: videoResult.secure_url,
+          thumbnailUrl,
+          duration,
+          uploader: userId,
+        });
+
+        await newVideo.save();
+        res.json(newVideo);
+      } catch (error) {
+        console.error("Video upload error:", error);
+        res.status(500).json({ error: "Video upload failed" });
+      }
+    }
+  );
+
+  // Get All Videos Endpoint
+  server.get("/api/videos", async (req, res) => {
+    try {
+      const videos = await Video.find()
+        .populate("uploader", "username")
+        .sort({ createdAt: -1 });
+      res.json(videos);
+    } catch (error) {
+      console.error("Fetch videos error:", error);
+      res.status(500).json({ error: "Failed to fetch videos" });
+    }
+  });
+
+  // Get Single Video Endpoint
+  server.get("/api/videos/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const video = await Video.findById(id).populate("uploader", "username");
+      if (!video) return res.status(404).json({ error: "Video not found" });
+      res.json(video);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch video" });
     }
   });
 

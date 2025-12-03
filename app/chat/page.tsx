@@ -10,7 +10,7 @@ export default function ChatPage() {
   const [activeChat, setActiveChat] = useState("tech");
 
   return (
-    <main className="h-screen flex flex-col bg-white text-black font-sans overflow-hidden">
+    <main className="h-screen flex flex-col bg-white text-primary font-sans overflow-hidden">
       <div className="flex-grow flex overflow-hidden">
         <ChatSidebar activeChat={activeChat} onSelectChat={setActiveChat} />
 

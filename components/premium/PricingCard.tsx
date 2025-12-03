@@ -17,10 +17,12 @@ export default function PricingCard({
   isPopular,
 }: PricingCardProps) {
   return (
-    <div className="bg-white rounded-xl p-6 flex flex-col h-full border border-gray-200 hover:border-black transition-colors shadow-sm hover:shadow-md">
-      <h3 className="text-xl font-bold text-center mb-2 text-black">{title}</h3>
+    <div className="bg-white rounded-xl p-6 flex flex-col h-full border border-gray-200 hover:border-primary transition-colors shadow-sm hover:shadow-md">
+      <h3 className="text-xl font-bold text-center mb-2 text-primary">
+        {title}
+      </h3>
       <div className="text-center mb-6">
-        <span className="text-3xl font-bold text-black">₹{price}</span>
+        <span className="text-3xl font-bold text-primary">₹{price}</span>
         <span className="text-gray-500 text-sm"> /{duration}</span>
       </div>
 
@@ -30,12 +32,12 @@ export default function PricingCard({
             key={index}
             className="flex items-start gap-2 text-sm text-gray-700"
           >
-            <Check className="w-4 h-4 text-black mt-0.5 flex-shrink-0" />
+            <Check className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
             <span>{feature}</span>
           </li>
         ))}
       </ul>
-      <Button className="w-full bg-black hover:bg-gray-800 text-white rounded-full">
+      <Button className="w-full bg-primary hover:bg-primary/90 text-white rounded-full">
         Choose Plan
       </Button>
     </div>

@@ -8,7 +8,7 @@ interface StreakCardProps {
 
 export default function StreakCard({ days, onClaim }: StreakCardProps) {
   return (
-    <div className="bg-black rounded-2xl p-8 flex items-center justify-between shadow-xl">
+    <div className="bg-primary rounded-2xl p-8 flex items-center justify-between shadow-xl">
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
           <Flame className="w-8 h-8 text-white fill-white" />
@@ -16,7 +16,7 @@ export default function StreakCard({ days, onClaim }: StreakCardProps) {
         <h2 className="text-2xl font-bold text-white">{days} Day Streak</h2>
         <Button
           onClick={onClaim}
-          className="bg-white hover:bg-gray-200 text-black mt-2 font-bold"
+          className="bg-white hover:bg-gray-200 text-primary mt-2 font-bold"
         >
           Claim Reward
         </Button>

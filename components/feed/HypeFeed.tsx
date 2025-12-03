@@ -115,14 +115,14 @@ export default function HypeFeed({ initialHypeId }: HypeFeedProps) {
   };
 
   return (
-    <div className="h-screen bg-white text-black font-sans overflow-hidden flex flex-col items-center relative">
+    <div className="h-screen bg-white text-primary font-sans overflow-hidden flex flex-col items-center relative">
       {/* Top Bar (Floating) */}
       <div className="absolute top-0 left-0 right-0 z-20 p-4 flex justify-between items-center bg-gradient-to-b from-white/80 to-transparent">
         <h1 className="text-xl font-bold">Hypes</h1>
         <Button
           onClick={() => setShowUploadModal(true)}
           size="icon"
-          className="bg-black/10 hover:bg-black/20 text-black backdrop-blur-md rounded-full w-10 h-10"
+          className="bg-primary/10 hover:bg-primary/20 text-primary backdrop-blur-md rounded-full w-10 h-10"
         >
           <Upload className="w-5 h-5" />
         </Button>
@@ -135,14 +135,14 @@ export default function HypeFeed({ initialHypeId }: HypeFeedProps) {
       >
         {hypes.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center p-8 opacity-60">
-            <div className="w-20 h-20 bg-black/10 rounded-full flex items-center justify-center mb-4">
+            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-4">
               <Upload className="w-10 h-10" />
             </div>
             <h2 className="text-xl font-bold mb-2">No Hypes Yet</h2>
             <p className="mb-6">Be the first to upload a hype!</p>
             <Button
               onClick={() => setShowUploadModal(true)}
-              className="bg-black text-white hover:bg-gray-800 font-bold rounded-full px-8"
+              className="bg-primary text-white hover:bg-primary/90 font-bold rounded-full px-8"
             >
               Create Hype
             </Button>

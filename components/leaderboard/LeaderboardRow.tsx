@@ -16,7 +16,7 @@ export default function LeaderboardRow({
   return (
     <div className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between mb-4 hover:bg-gray-50 transition-colors shadow-sm">
       <div className="flex items-center gap-6">
-        <span className="text-3xl font-bold text-black w-8 text-center">
+        <span className="text-3xl font-bold text-primary w-8 text-center">
           {rank}
         </span>
 
@@ -27,14 +27,14 @@ export default function LeaderboardRow({
             {/* Placeholder Avatar */}
             <div className="w-full h-full bg-gray-200" />
           </div>
-          <span className="text-xl font-bold text-black">{name}</span>
+          <span className="text-xl font-bold text-primary">{name}</span>
         </div>
       </div>
 
       <div className="flex items-center gap-8">
         <div className="flex items-center gap-2">
           <span className="text-gray-400 font-bold">XP</span>
-          <span className="text-xl font-bold text-black">
+          <span className="text-xl font-bold text-primary">
             {xp.toLocaleString()}
           </span>
         </div>
