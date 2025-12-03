@@ -231,6 +231,13 @@ app.prepare().then(() => {
     "DEBUG: MONGODB_URI is",
     MONGODB_URI.substring(0, 15) + "..." // Log start of URI for verification
   );
+
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    console.warn("WARNING: EMAIL_USER or EMAIL_PASS is missing.");
+    console.warn("2FA codes will be logged to console instead of emailed.");
+  } else {
+    console.log("Email system configured.");
+  }
   console.log("---------------------------------------------------");
 
   const clientOptions = {
