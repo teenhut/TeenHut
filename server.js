@@ -14,15 +14,15 @@ const handle = app.getRequestHandler();
 const nodemailer = require("nodemailer");
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
-  port: 465,
-  secure: true, // true for 465, false for other ports
+  port: 587,
+  secure: false, // true for 465, false for other ports
   auth: {
     user: process.env.EMAIL_USER?.trim(),
     pass: process.env.EMAIL_PASS?.trim(),
   },
-  connectionTimeout: 10000, // 10 seconds
-  greetingTimeout: 10000, // 10 seconds
-  socketTimeout: 10000, // 10 seconds
+  connectionTimeout: 20000, // 20 seconds
+  greetingTimeout: 20000, // 20 seconds
+  socketTimeout: 20000, // 20 seconds
   debug: true, // show debug output
   logger: true, // log information in console
   family: 4, // Force IPv4
