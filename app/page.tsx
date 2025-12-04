@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import VideoCard from "@/components/video/VideoCard";
 import LongVideoCard from "@/components/VideoCard";
+import { Globe, MessageSquare, Plus, Users } from "lucide-react";
 
 interface Video {
   _id: string;
@@ -107,6 +108,58 @@ export default function Home() {
               For Creators
             </Link>
           </motion.div>
+        </div>
+      </div>
+
+      {/* Connect Section */}
+      <div className="w-full max-w-7xl px-4 mb-20 z-10">
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-3xl font-bold text-gray-900">Connect</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* World Chat */}
+          <Link
+            href="/chat?room=world"
+            className="group bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-8 text-white shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 relative overflow-hidden flex flex-col items-start"
+          >
+            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+              <Globe className="w-32 h-32" />
+            </div>
+            <div className="relative z-10 mb-8">
+              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4 backdrop-blur-sm">
+                <Globe className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold mb-2">World Chat</h3>
+              <p className="text-blue-100">
+                Join the global conversation with everyone on Teen Hut.
+              </p>
+            </div>
+            <div className="mt-auto relative z-10 bg-white/20 hover:bg-white/30 transition-colors px-6 py-2 rounded-lg font-semibold backdrop-blur-sm">
+              Join Now
+            </div>
+          </Link>
+
+          {/* Create Chat */}
+          <Link
+            href="/chat?action=create"
+            className="group bg-gradient-to-br from-pink-500 to-pink-600 rounded-2xl p-8 text-white shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 relative overflow-hidden flex flex-col items-start"
+          >
+            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+              <Plus className="w-32 h-32" />
+            </div>
+            <div className="relative z-10 mb-8">
+              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4 backdrop-blur-sm">
+                <Plus className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold mb-2">Create Chat</h3>
+              <p className="text-pink-100">
+                Start a new private group or public room.
+              </p>
+            </div>
+            <div className="mt-auto relative z-10 bg-white/20 hover:bg-white/30 transition-colors px-6 py-2 rounded-lg font-semibold backdrop-blur-sm">
+              Create Now
+            </div>
+          </Link>
         </div>
       </div>
 

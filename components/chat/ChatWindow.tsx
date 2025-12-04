@@ -55,9 +55,10 @@ export default function ChatWindow({ chatId }: { chatId: string }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (!socket) return;
+    if (!socket || !user) return;
 
-    socket.emit("join-room", chatId);
+    // Send object with room and userId for validation
+    socket.emit("join-room", { room: chatId, userId: user.id });
 
     const handleHistory = (historyMessages: any[]) => {
       const formattedMessages = historyMessages.map((msg) => ({

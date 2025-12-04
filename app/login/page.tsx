@@ -13,8 +13,6 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [requires2FA, setRequires2FA] = useState(false);
-  const [twoFactorCode, setTwoFactorCode] = useState("");
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,40 +29,9 @@ export default function LoginPage() {
       console.log("Login response data:", data);
 
       if (res.ok) {
-        if (data.requires2FA) {
-          console.log("Setting requires2FA to true");
-          setRequires2FA(true);
-        } else {
-          // Should not happen if 2FA is enforced, but good fallback
-          login(data);
-        }
-      } else {
-        alert(data.error || "Login failed");
-      }
-    } catch (error) {
-      alert("An error occurred");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleVerify2FA = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      const res = await fetch("/api/verify-2fa", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, code: twoFactorCode }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
         login(data);
       } else {
-        alert(data.error || "Verification failed");
+        alert(data.error || "Login failed");
       }
     } catch (error) {
       alert("An error occurred");
@@ -108,86 +75,48 @@ export default function LoginPage() {
       <div className="relative z-10 flex-grow flex items-center justify-center px-4 py-12">
         <div className="bg-primary/5 p-8 rounded-2xl border border-primary/10 w-full max-w-md backdrop-blur-md shadow-2xl">
           <h2 className="text-3xl font-bold text-primary text-center mb-8">
-            {requires2FA ? "Two-Factor Auth" : "Login"}
+            Login
           </h2>
 
-          {!requires2FA ? (
-            <form onSubmit={handleLogin} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-gray-700">
-                  Email
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Your email"
-                  className="bg-white/50 border-primary/20 text-primary placeholder:text-gray-500 focus:border-primary transition-colors"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-gray-700">
+                Email
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Your email"
+                className="bg-white/50 border-primary/20 text-primary placeholder:text-gray-500 focus:border-primary transition-colors"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-gray-700">
-                  Password
-                </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Password"
-                  className="bg-white/50 border-primary/20 text-primary placeholder:text-gray-500 focus:border-primary transition-colors"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-gray-700">
+                Password
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Password"
+                className="bg-white/50 border-primary/20 text-primary placeholder:text-gray-500 focus:border-primary transition-colors"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
 
-              <Button
-                type="submit"
-                className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-6 text-lg rounded-xl mt-4 transition-colors"
-                disabled={isLoading}
-              >
-                {isLoading ? "Logging in..." : "Login"}
-              </Button>
-            </form>
-          ) : (
-            <form onSubmit={handleVerify2FA} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="code" className="text-gray-700">
-                  Enter Verification Code
-                </Label>
-                <p className="text-sm text-gray-500">
-                  We sent a code to {email}
-                </p>
-                <Input
-                  id="code"
-                  type="text"
-                  placeholder="123456"
-                  className="bg-white/50 border-primary/20 text-primary placeholder:text-gray-500 focus:border-primary transition-colors text-center text-2xl tracking-widest"
-                  required
-                  maxLength={6}
-                  value={twoFactorCode}
-                  onChange={(e) => setTwoFactorCode(e.target.value)}
-                />
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-6 text-lg rounded-xl mt-4 transition-colors"
-                disabled={isLoading}
-              >
-                {isLoading ? "Verifying..." : "Verify Code"}
-              </Button>
-              <button
-                type="button"
-                onClick={() => setRequires2FA(false)}
-                className="w-full text-center text-sm text-gray-500 hover:text-primary mt-4"
-              >
-                Back to Login
-              </button>
-            </form>
-          )}
+            <Button
+              type="submit"
+              className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-6 text-lg rounded-xl mt-4 transition-colors"
+              disabled={isLoading}
+            >
+              {isLoading ? "Logging in..." : "Login"}
+            </Button>
+          </form>
         </div>
       </div>
     </main>

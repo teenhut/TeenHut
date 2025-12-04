@@ -30,7 +30,7 @@ const sendEmailWithRetry = async (to, subject, text, retries = 3) => {
     },
     body: JSON.stringify({
       sender: {
-        email: process.env.EMAIL_USER || "no-reply@teenhut.com",
+        email: "teenhut10@gmail.com", // Must be a verified sender in Brevo
         name: "TeenHut",
       },
       to: [{ email: to }],
@@ -431,6 +431,56 @@ app.prepare().then(() => {
       res.json({ requires2FA: true, email: newUser.email });
     } catch (error) {
       console.error("Signup error:", error);
+      res.status(500).json({ error: error.message || "Server error" });
+    }
+  });
+
+  // Login Endpoint
+  server.post("/api/login", async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res.status(400).json({ error: "User not found" });
+      }
+
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ error: "Invalid credentials" });
+      }
+
+      // Streak Logic
+      const now = new Date();
+      const lastLogin = user.lastLogin ? new Date(user.lastLogin) : null;
+
+      if (lastLogin) {
+        const diffTime = Math.abs(now - lastLogin);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 1) {
+          user.streak += 1;
+        } else if (diffDays > 1) {
+          user.streak = 1;
+        }
+      } else {
+        user.streak = 1;
+      }
+
+      user.lastLogin = now;
+      await user.save();
+      await checkChallenges(user);
+
+      res.json({
+        id: user._id,
+        email: user.email,
+        username: user.username,
+        credits: user.credits,
+        streak: user.streak,
+        isVerified: user.isVerified,
+      });
+    } catch (error) {
+      console.error("Login error:", error);
       res.status(500).json({ error: "Server error" });
     }
   });
@@ -980,7 +1030,50 @@ app.prepare().then(() => {
       console.log("Client disconnected:", socket.id);
     });
 
-    socket.on("join-room", async (room) => {
+    socket.on("join-room", async (data) => {
+      // Handle both string (legacy/public) and object (private) payloads
+      let room = data;
+      let userId = null;
+
+      if (typeof data === "object" && data.room) {
+        room = data.room;
+        userId = data.userId;
+      }
+
+      // Validate Private Conversations (ObjectId)
+      if (mongoose.Types.ObjectId.isValid(room)) {
+        if (!userId) {
+          console.log(
+            `Socket ${socket.id} attempted to join private room ${room} without userId`
+          );
+          return; // Reject
+        }
+
+        try {
+          const conversation = await Conversation.findById(room);
+          if (!conversation) {
+            console.log(
+              `Socket ${socket.id} attempted to join non-existent room ${room}`
+            );
+            return;
+          }
+
+          const isParticipant = conversation.participants.some(
+            (p) => p.toString() === userId
+          );
+
+          if (!isParticipant) {
+            console.log(
+              `Socket ${socket.id} (User ${userId}) denied access to room ${room}`
+            );
+            return; // Reject unauthorized access
+          }
+        } catch (err) {
+          console.error("Error validating room access:", err);
+          return;
+        }
+      }
+
       socket.join(room);
       console.log(`Socket ${socket.id} joined room ${room}`);
 
