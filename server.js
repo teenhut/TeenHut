@@ -10,26 +10,46 @@ const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
 const handle = app.getRequestHandler();
 
-// Resend Configuration
-const { Resend } = require("resend");
-const resend = new Resend(process.env.RESEND_API_KEY || "re_123456789"); // Fallback to prevent crash if missing
+// Brevo (Sendinblue) Configuration
+const BREVO_API_KEY = process.env.BREVO_API_KEY;
 
-// Helper: Send Email with Retry (using Resend)
+// Helper: Send Email with Retry (using Brevo HTTP API)
 const sendEmailWithRetry = async (to, subject, text, retries = 3) => {
+  if (!BREVO_API_KEY) {
+    console.error("BREVO_API_KEY is missing!");
+    return false;
+  }
+
+  const url = "https://api.brevo.com/v3/smtp/email";
+  const options = {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json",
+      "api-key": BREVO_API_KEY,
+    },
+    body: JSON.stringify({
+      sender: {
+        email: process.env.EMAIL_USER || "no-reply@teenhut.com",
+        name: "TeenHut",
+      },
+      to: [{ email: to }],
+      subject: subject,
+      htmlContent: `<p>${text}</p>`,
+    }),
+  };
+
   for (let i = 0; i < retries; i++) {
     try {
-      const { data, error } = await resend.emails.send({
-        from: "TeenHut <onboarding@resend.dev>", // Use onboarding domain for testing
-        to: [to],
-        subject: subject,
-        html: `<p>${text}</p>`, // Resend supports HTML
-      });
+      const response = await fetch(url, options);
 
-      if (error) {
-        throw new Error(error.message);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(JSON.stringify(errorData));
       }
 
-      console.log("Email sent successfully:", data.id);
+      const data = await response.json();
+      console.log("Email sent successfully via Brevo:", data.messageId);
       return true;
     } catch (error) {
       console.error(`Email attempt ${i + 1} failed:`, error.message);
@@ -304,14 +324,16 @@ app.prepare().then(() => {
     try {
       const { email } = req.query;
       if (!email) {
-        return res.status(400).json({ error: "Email query parameter required" });
+        return res
+          .status(400)
+          .json({ error: "Email query parameter required" });
       }
 
       if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-        return res.status(500).json({ 
+        return res.status(500).json({
           error: "Email configuration missing",
           userSet: !!process.env.EMAIL_USER,
-          passSet: !!process.env.EMAIL_PASS
+          passSet: !!process.env.EMAIL_PASS,
         });
       }
 
@@ -325,9 +347,15 @@ app.prepare().then(() => {
       transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
           console.error("Test email error:", error);
-          return res.status(500).json({ error: "Failed to send email", details: error.message });
+          return res
+            .status(500)
+            .json({ error: "Failed to send email", details: error.message });
         }
-        res.json({ success: true, message: "Email sent successfully", info: info.response });
+        res.json({
+          success: true,
+          message: "Email sent successfully",
+          info: info.response,
+        });
       });
     } catch (error) {
       console.error("Test email error:", error);
@@ -381,17 +409,19 @@ app.prepare().then(() => {
       await newUser.save();
 
       // Send Email
-      if (process.env.RESEND_API_KEY) {
+      if (process.env.BREVO_API_KEY) {
         const sent = await sendEmailWithRetry(
           email,
           "Teen Hut Verification Code",
           `Your verification code is: ${code}`
         );
-        
+
         if (!sent) {
           // FALLBACK: Log the code
           console.log("---------------------------------------------------");
-          console.log(`FALLBACK DEBUG: Verification Code for ${email} is ${code}`);
+          console.log(
+            `FALLBACK DEBUG: Verification Code for ${email} is ${code}`
+          );
           console.log("---------------------------------------------------");
         }
       } else {
