@@ -328,6 +328,25 @@ app.prepare().then(() => {
     }
   });
 
+  // Helper: Send Email with Retry
+  const sendEmailWithRetry = async (mailOptions, retries = 3) => {
+    for (let i = 0; i < retries; i++) {
+      try {
+        const info = await transporter.sendMail(mailOptions);
+        console.log("Email sent successfully:", info.response);
+        return true;
+      } catch (error) {
+        console.error(`Email attempt ${i + 1} failed:`, error.message);
+        if (i === retries - 1) {
+          console.error("All email attempts failed.");
+          return false;
+        }
+        // Wait 2 seconds before retrying
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+      }
+    }
+  };
+
   // API Endpoints
   server.post("/api/signup", async (req, res) => {
     const { email, username, password } = req.body;
@@ -386,19 +405,15 @@ app.prepare().then(() => {
       };
 
       if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-        transporter.sendMail(mailOptions, (error, info) => {
-          if (error) {
-            console.error("Error sending email:", error);
-            // FALLBACK: Log the code so the user can still login
-            console.log("---------------------------------------------------");
-            console.log(
-              `FALLBACK DEBUG: Verification Code for ${email} is ${code}`
-            );
-            console.log("---------------------------------------------------");
-          } else {
-            console.log("Email sent:", info.response);
-          }
-        });
+        const sent = await sendEmailWithRetry(mailOptions);
+        if (!sent) {
+          // FALLBACK: Log the code so the user can still login
+          console.log("---------------------------------------------------");
+          console.log(
+            `FALLBACK DEBUG: Verification Code for ${email} is ${code}`
+          );
+          console.log("---------------------------------------------------");
+        }
       } else {
         console.log(`DEBUG: Verification Code for ${email} is ${code}`);
       }
@@ -440,23 +455,15 @@ app.prepare().then(() => {
         };
 
         if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-          transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-              console.error("Error sending email:", error);
-              // FALLBACK: Log the code so the user can still login
-              console.log(
-                "---------------------------------------------------"
-              );
-              console.log(
-                `FALLBACK DEBUG: Verification Code for ${user.email} is ${code}`
-              );
-              console.log(
-                "---------------------------------------------------"
-              );
-            } else {
-              console.log("Email sent: " + info.response);
-            }
-          });
+          const sent = await sendEmailWithRetry(mailOptions);
+          if (!sent) {
+            // FALLBACK: Log the code so the user can still login
+            console.log("---------------------------------------------------");
+            console.log(
+              `FALLBACK DEBUG: Verification Code for ${user.email} is ${code}`
+            );
+            console.log("---------------------------------------------------");
+          }
         } else {
           console.log("---------------------------------------------------");
           console.log(`DEBUG: 2FA Code for ${user.email} is ${code}`);
