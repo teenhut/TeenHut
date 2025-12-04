@@ -17,8 +17,8 @@ const transporter = nodemailer.createTransport({
   port: 465,
   secure: true, // true for 465, false for other ports
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    user: process.env.EMAIL_USER?.trim(),
+    pass: process.env.EMAIL_PASS?.trim(),
   },
   connectionTimeout: 10000, // 10 seconds
   greetingTimeout: 10000, // 10 seconds
@@ -281,6 +281,50 @@ app.prepare().then(() => {
       res.json({ users, hypes });
     } catch (err) {
       res.status(500).json({ error: err.message });
+    }
+  });
+
+  // Test Email Endpoint
+  server.get("/api/test-email", async (req, res) => {
+    try {
+      const { email } = req.query;
+      if (!email) {
+        return res
+          .status(400)
+          .json({ error: "Email query parameter required" });
+      }
+
+      if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+        return res.status(500).json({
+          error: "Email configuration missing",
+          userSet: !!process.env.EMAIL_USER,
+          passSet: !!process.env.EMAIL_PASS,
+        });
+      }
+
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "TeenHut Test Email",
+        text: "If you are reading this, the email configuration is working correctly!",
+      };
+
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error("Test email error:", error);
+          return res
+            .status(500)
+            .json({ error: "Failed to send email", details: error.message });
+        }
+        res.json({
+          success: true,
+          message: "Email sent successfully",
+          info: info.response,
+        });
+      });
+    } catch (error) {
+      console.error("Test email error:", error);
+      res.status(500).json({ error: "Server error", details: error.message });
     }
   });
 
