@@ -10,23 +10,38 @@ const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
 const handle = app.getRequestHandler();
 
-// Nodemailer Configuration
-const nodemailer = require("nodemailer");
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false, // true for 465, false for other ports
-  auth: {
-    user: process.env.EMAIL_USER?.trim(),
-    pass: process.env.EMAIL_PASS?.trim(),
-  },
-  connectionTimeout: 20000, // 20 seconds
-  greetingTimeout: 20000, // 20 seconds
-  socketTimeout: 20000, // 20 seconds
-  debug: true, // show debug output
-  logger: true, // log information in console
-  family: 4, // Force IPv4
-});
+// Resend Configuration
+const { Resend } = require("resend");
+const resend = new Resend(process.env.RESEND_API_KEY || "re_123456789"); // Fallback to prevent crash if missing
+
+// Helper: Send Email with Retry (using Resend)
+const sendEmailWithRetry = async (to, subject, text, retries = 3) => {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const { data, error } = await resend.emails.send({
+        from: "TeenHut <onboarding@resend.dev>", // Use onboarding domain for testing
+        to: [to],
+        subject: subject,
+        html: `<p>${text}</p>`, // Resend supports HTML
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      console.log("Email sent successfully:", data.id);
+      return true;
+    } catch (error) {
+      console.error(`Email attempt ${i + 1} failed:`, error.message);
+      if (i === retries - 1) {
+        console.error("All email attempts failed.");
+        return false;
+      }
+      // Wait 1 second before retrying
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+  }
+};
 
 // User Schema
 const userSchema = new mongoose.Schema({
@@ -289,16 +304,14 @@ app.prepare().then(() => {
     try {
       const { email } = req.query;
       if (!email) {
-        return res
-          .status(400)
-          .json({ error: "Email query parameter required" });
+        return res.status(400).json({ error: "Email query parameter required" });
       }
 
       if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-        return res.status(500).json({
+        return res.status(500).json({ 
           error: "Email configuration missing",
           userSet: !!process.env.EMAIL_USER,
-          passSet: !!process.env.EMAIL_PASS,
+          passSet: !!process.env.EMAIL_PASS
         });
       }
 
@@ -312,15 +325,9 @@ app.prepare().then(() => {
       transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
           console.error("Test email error:", error);
-          return res
-            .status(500)
-            .json({ error: "Failed to send email", details: error.message });
+          return res.status(500).json({ error: "Failed to send email", details: error.message });
         }
-        res.json({
-          success: true,
-          message: "Email sent successfully",
-          info: info.response,
-        });
+        res.json({ success: true, message: "Email sent successfully", info: info.response });
       });
     } catch (error) {
       console.error("Test email error:", error);
@@ -328,32 +335,9 @@ app.prepare().then(() => {
     }
   });
 
-  // Helper: Send Email with Retry
-  const sendEmailWithRetry = async (mailOptions, retries = 3) => {
-    for (let i = 0; i < retries; i++) {
-      try {
-        const info = await transporter.sendMail(mailOptions);
-        console.log("Email sent successfully:", info.response);
-        return true;
-      } catch (error) {
-        console.error(`Email attempt ${i + 1} failed:`, error.message);
-        if (i === retries - 1) {
-          console.error("All email attempts failed.");
-          return false;
-        }
-        // Wait 2 seconds before retrying
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-      }
-    }
-  };
-
   // API Endpoints
   server.post("/api/signup", async (req, res) => {
     const { email, username, password } = req.body;
-
-    if (!email || !username || !password) {
-      return res.status(400).json({ error: "Missing fields" });
-    }
 
     // Email Domain Validation
     const allowedDomains = [
@@ -397,21 +381,17 @@ app.prepare().then(() => {
       await newUser.save();
 
       // Send Email
-      const mailOptions = {
-        from: process.env.EMAIL_USER,
-        to: email,
-        subject: "Teen Hut Verification Code",
-        text: `Your verification code is: ${code}`,
-      };
-
-      if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-        const sent = await sendEmailWithRetry(mailOptions);
+      if (process.env.RESEND_API_KEY) {
+        const sent = await sendEmailWithRetry(
+          email,
+          "Teen Hut Verification Code",
+          `Your verification code is: ${code}`
+        );
+        
         if (!sent) {
-          // FALLBACK: Log the code so the user can still login
+          // FALLBACK: Log the code
           console.log("---------------------------------------------------");
-          console.log(
-            `FALLBACK DEBUG: Verification Code for ${email} is ${code}`
-          );
+          console.log(`FALLBACK DEBUG: Verification Code for ${email} is ${code}`);
           console.log("---------------------------------------------------");
         }
       } else {
@@ -421,64 +401,6 @@ app.prepare().then(() => {
       res.json({ requires2FA: true, email: newUser.email });
     } catch (error) {
       console.error("Signup error:", error);
-      res.status(500).json({ error: "Server error" });
-    }
-  });
-
-  server.post("/api/login", async (req, res) => {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-      return res.status(400).json({ error: "Missing fields" });
-    }
-
-    try {
-      const user = await User.findOne({ email });
-      if (!user) {
-        return res.status(401).json({ error: "Invalid credentials" });
-      }
-
-      const match = await bcrypt.compare(password, user.password);
-      if (match) {
-        // Generate 2FA Code
-        const code = Math.floor(100000 + Math.random() * 900000).toString();
-        user.twoFactorCode = code;
-        user.twoFactorExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
-        await user.save();
-
-        // Send Email
-        const mailOptions = {
-          from: process.env.EMAIL_USER,
-          to: user.email,
-          subject: "Your 2FA Code - TeenHut",
-          text: `Your verification code is: ${code}`,
-        };
-
-        if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-          const sent = await sendEmailWithRetry(mailOptions);
-          if (!sent) {
-            // FALLBACK: Log the code so the user can still login
-            console.log("---------------------------------------------------");
-            console.log(
-              `FALLBACK DEBUG: Verification Code for ${user.email} is ${code}`
-            );
-            console.log("---------------------------------------------------");
-          }
-        } else {
-          console.log("---------------------------------------------------");
-          console.log(`DEBUG: 2FA Code for ${user.email} is ${code}`);
-          console.log(
-            "Configure EMAIL_USER and EMAIL_PASS to send real emails."
-          );
-          console.log("---------------------------------------------------");
-        }
-
-        res.json({ requires2FA: true, email: user.email });
-      } else {
-        res.status(401).json({ error: "Invalid credentials" });
-      }
-    } catch (error) {
-      console.error("Login error:", error);
       res.status(500).json({ error: "Server error" });
     }
   });
