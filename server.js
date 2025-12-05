@@ -1142,7 +1142,7 @@ app.prepare().then(() => {
             id: message._id,
             text: message.text,
             isEdited: true,
-          });
+          })-
         }
       } catch (error) {
         console.error("Error editing message:", error);

@@ -1,5 +1,5 @@
 "use client";
-
+import { Analytics } from "@vercel/analytics/next"
 import ParticleBackground from "@/components/ui/ParticleBackground";
 import { motion } from "framer-motion";
 import Link from "next/link";
