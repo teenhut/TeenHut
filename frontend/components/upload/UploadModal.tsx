@@ -11,6 +11,7 @@ interface UploadModalProps {
 }
 
 import { useAuth } from "@/context/AuthContext";
+import { API_BASE_URL } from "@/lib/api-config";
 
 export default function UploadModal({
   isOpen,
@@ -77,7 +78,7 @@ export default function UploadModal({
     formData.append("userId", user?.id || "");
 
     try {
-      const res = await fetch("/api/hypes", {
+      const res = await fetch(`${API_BASE_URL}/api/hypes`, {
         method: "POST",
         body: formData,
       });
