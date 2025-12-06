@@ -8,3 +8,6 @@
   sync: false
 - key: EMAIL_PASS
   sync: false
+  sync: false
+- key: BREVO_API_KEY
+  sync: false
