@@ -10,8 +10,23 @@ const nodemailer = require("nodemailer");
 const cors = require("cors");
 
 const dev = process.env.NODE_ENV !== "production";
-const app = next({ dev });
-const handle = app.getRequestHandler();
+const app = express();
+const httpServer = http.createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: process.env.FRONTEND_URL || "*", // Allow Vercel frontend
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+});
+
+app.use(express.json());
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "*", // Allow Vercel frontend
+    credentials: true,
+  })
+);
 
 // Brevo (Sendinblue) Configuration
 const BREVO_API_KEY = process.env.BREVO_API_KEY;
@@ -90,16 +105,53 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.models.User || mongoose.model("User", userSchema);
 
-app.prepare().then(() => {
-  const server = express();
-  const httpServer = http.createServer(server);
-  const io = new Server(httpServer, {
-    cors: {
-      origin: process.env.FRONTEND_URL || "*", // Allow Vercel frontend
-      methods: ["GET", "POST"],
-      credentials: true,
-    },
+// Cloudinary Configuration
+const cloudinary = require("cloudinary").v2;
+const multer = require("multer");
+
+// Email Transporter Configuration
+const transporter = nodemailer.createTransport({
+  service: "gmail", // Or use host/port for other providers
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+const upload = multer({ storage: multer.memoryStorage() });
+
+// Connect to MongoDB
+const MONGODB_URI = process.env.MONGODB_URI;
+
+if (!MONGODB_URI) {
+  console.error("FATAL ERROR: MONGODB_URI is not defined in .env file");
+  process.exit(1);
+}
+
+const clientOptions = {
+  serverApi: { version: "1", strict: true, deprecationErrors: true },
+};
+
+mongoose
+  .connect(MONGODB_URI, clientOptions)
+  .then(() => {
+    console.log("Connected to MongoDB Atlas");
+    migrateLegacyHypes(); 
+  })
+  .catch((err) => {
+    console.error("Could not connect to MongoDB Atlas", err);
   });
+
+// Root Route
+app.get("/", (req, res) => {
+  res.send("TeenHut Backend is Running");
+});
 
   server.use(express.json());
   server.use(
@@ -1214,13 +1266,12 @@ app.prepare().then(() => {
     });
   });
 
-  server.all(/.*/, (req, res) => {
+  /* server.all(/.*/, (req, res) => {
     return handle(req, res);
-  });
+  }); */
 
   const PORT = process.env.PORT || 3000;
   httpServer.listen(PORT, (err) => {
     if (err) throw err;
     console.log(`> Ready on http://localhost:${PORT}`);
   });
-});

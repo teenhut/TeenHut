@@ -23,6 +23,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 build_log*.txt
+server.log
+debug_output.txt
+*.log
 
 # local env files
 .env
@@ -34,4 +37,3 @@ build_log*.txt
 # typescript
 *.tsbuildinfo
 next-env.d.ts
--1.14-windows.xml
