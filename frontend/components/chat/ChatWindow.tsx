@@ -6,6 +6,7 @@ import { Smile, Paperclip, Send } from "lucide-react";
 import { useSocket } from "@/hooks/useSocket";
 import { encryptMessage, decryptMessage } from "@/utils/encryption";
 import { useAuth } from "@/context/AuthContext";
+import { API_BASE_URL } from "@/lib/api-config";
 
 interface Message {
   id: string;
@@ -255,7 +256,7 @@ export default function ChatWindow({ chatId }: { chatId: string }) {
     formData.append("file", file);
 
     try {
-      const res = await fetch("/api/chat/upload", {
+      const res = await fetch(`${API_BASE_URL}/api/chat/upload`, {
         method: "POST",
         body: formData,
       });
