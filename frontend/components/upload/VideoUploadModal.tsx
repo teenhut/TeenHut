@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Upload, X, CheckCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { API_BASE_URL } from "@/lib/api-config";
 
 interface VideoUploadModalProps {
   isOpen: boolean;
@@ -102,7 +103,7 @@ export default function VideoUploadModal({
     formData.append("duration", "00:00");
 
     try {
-      const res = await fetch("/api/videos/upload", {
+      const res = await fetch(`${API_BASE_URL}/api/videos/upload`, {
         method: "POST",
         body: formData,
       });
