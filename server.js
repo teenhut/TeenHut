@@ -5,6 +5,7 @@ const http = require("http");
 const { Server } = require("socket.io");
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
+const nodemailer = require("nodemailer");
 
 const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
@@ -98,6 +99,15 @@ app.prepare().then(() => {
   const cloudinary = require("cloudinary").v2;
   const multer = require("multer");
 
+  // Email Transporter Configuration
+  const transporter = nodemailer.createTransport({
+    service: "gmail", // Or use host/port for other providers
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
   cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
@@ -108,7 +118,6 @@ app.prepare().then(() => {
 
   // Hype Schema
   const hypeSchema = new mongoose.Schema({
-    title: { type: String, required: true },
     title: { type: String, required: true },
     author: { type: String, required: true },
     creatorId: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Added creatorId
@@ -1142,7 +1151,7 @@ app.prepare().then(() => {
             id: message._id,
             text: message.text,
             isEdited: true,
-          })-
+          });
         }
       } catch (error) {
         console.error("Error editing message:", error);
