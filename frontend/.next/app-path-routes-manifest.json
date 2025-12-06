@@ -1,0 +1,21 @@
+{
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/analytics/page": "/analytics",
+  "/challenges/page": "/challenges",
+  "/chat/page": "/chat",
+  "/customize/page": "/customize",
+  "/dashboard/page": "/dashboard",
+  "/hypes/[id]/page": "/hypes/[id]",
+  "/hypes/page": "/hypes",
+  "/leaderboard/page": "/leaderboard",
+  "/login/page": "/login",
+  "/page": "/",
+  "/premium/page": "/premium",
+  "/profile/page": "/profile",
+  "/signup/page": "/signup",
+  "/terms/page": "/terms",
+  "/users/[id]/page": "/users/[id]",
+  "/videos/[id]/page": "/videos/[id]",
+  "/videos/page": "/videos"
+}

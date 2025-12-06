@@ -1,0 +1,21 @@
+{
+  "/_global-error/page": "app/_global-error/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/analytics/page": "app/analytics/page.js",
+  "/challenges/page": "app/challenges/page.js",
+  "/chat/page": "app/chat/page.js",
+  "/customize/page": "app/customize/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/hypes/[id]/page": "app/hypes/[id]/page.js",
+  "/hypes/page": "app/hypes/page.js",
+  "/leaderboard/page": "app/leaderboard/page.js",
+  "/login/page": "app/login/page.js",
+  "/page": "app/page.js",
+  "/premium/page": "app/premium/page.js",
+  "/profile/page": "app/profile/page.js",
+  "/signup/page": "app/signup/page.js",
+  "/terms/page": "app/terms/page.js",
+  "/users/[id]/page": "app/users/[id]/page.js",
+  "/videos/[id]/page": "app/videos/[id]/page.js",
+  "/videos/page": "app/videos/page.js"
+}

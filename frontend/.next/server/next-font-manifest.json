@@ -1,0 +1,79 @@
+{
+  "app": {
+    "[project]/app/_not-found/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/Debata_Regular-s.p.66e3327f.otf"
+    ],
+    "[project]/app/analytics/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/Debata_Regular-s.p.66e3327f.otf"
+    ],
+    "[project]/app/challenges/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/Debata_Regular-s.p.66e3327f.otf"
+    ],
+    "[project]/app/chat/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/Debata_Regular-s.p.66e3327f.otf"
+    ],
+    "[project]/app/customize/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/Debata_Regular-s.p.66e3327f.otf"
+    ],
+    "[project]/app/dashboard/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/Debata_Regular-s.p.66e3327f.otf"
+    ],
+    "[project]/app/hypes/[id]/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/Debata_Regular-s.p.66e3327f.otf"
+    ],
+    "[project]/app/hypes/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/Debata_Regular-s.p.66e3327f.otf"
+    ],
+    "[project]/app/leaderboard/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/Debata_Regular-s.p.66e3327f.otf"
+    ],
+    "[project]/app/login/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/Debata_Regular-s.p.66e3327f.otf"
+    ],
+    "[project]/app/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/Debata_Regular-s.p.66e3327f.otf"
+    ],
+    "[project]/app/premium/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/Debata_Regular-s.p.66e3327f.otf"
+    ],
+    "[project]/app/profile/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/Debata_Regular-s.p.66e3327f.otf"
+    ],
+    "[project]/app/signup/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/Debata_Regular-s.p.66e3327f.otf"
+    ],
+    "[project]/app/terms/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/Debata_Regular-s.p.66e3327f.otf"
+    ],
+    "[project]/app/users/[id]/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/Debata_Regular-s.p.66e3327f.otf"
+    ],
+    "[project]/app/videos/[id]/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/Debata_Regular-s.p.66e3327f.otf"
+    ],
+    "[project]/app/videos/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/Debata_Regular-s.p.66e3327f.otf"
+    ]
+  },
+  "appUsingSizeAdjust": true,
+  "pages": {},
+  "pagesUsingSizeAdjust": false
+}
