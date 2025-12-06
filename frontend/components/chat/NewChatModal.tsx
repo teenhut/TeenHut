@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { X, Search, Check, Users } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { API_BASE_URL } from "@/lib/api-config";
 
 interface User {
   _id: string;
@@ -37,7 +38,7 @@ export default function NewChatModal({
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch("/api/users");
+      const res = await fetch(`${API_BASE_URL}/api/users`);
       const data = await res.json();
       // Filter out current user
       setUsers(data.filter((u: User) => u._id !== currentUser?.id));
@@ -69,7 +70,7 @@ export default function NewChatModal({
         ...selectedUsers.map((u) => u._id),
       ];
 
-      const res = await fetch("/api/conversations", {
+      const res = await fetch(`${API_BASE_URL}/api/conversations`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
