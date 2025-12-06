@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
+import { API_BASE_URL } from "@/lib/api-config";
 import { BarChart3, TrendingUp, Users, Eye, Heart } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -15,7 +16,7 @@ export default function AnalyticsPage() {
 
   useEffect(() => {
     if (user?.id) {
-      fetch(`/api/analytics?userId=${user.id}`)
+      fetch(`${API_BASE_URL}/api/analytics?userId=${user.id}`)
         .then((res) => res.json())
         .then((data) => setStats(data))
         .catch((err) => console.error("Failed to fetch analytics", err));

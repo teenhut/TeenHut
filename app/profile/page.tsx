@@ -7,6 +7,7 @@ import UploadModal from "@/components/upload/UploadModal";
 import Link from "next/link";
 
 import { useAuth } from "@/context/AuthContext";
+import { API_BASE_URL } from "@/lib/api-config";
 
 interface Hype {
   _id: string;
@@ -26,7 +27,7 @@ export default function ProfilePage() {
   const fetchHypes = async () => {
     if (!user?.id) return;
     try {
-      const res = await fetch(`/api/hypes?creatorId=${user.id}`);
+      const res = await fetch(`${API_BASE_URL}/api/hypes?creatorId=${user.id}`);
       const data = await res.json();
       setHypes(data);
     } catch (error) {

@@ -1,10 +1,11 @@
-'use client'
+"use client";
 
 import { useEffect, useState } from "react";
 import VideoCard from "@/components/VideoCard";
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
 import VideoUploadModal from "@/components/upload/VideoUploadModal";
+import { API_BASE_URL } from "@/lib/api-config";
 
 export default function VideosPage() {
   const [videos, setVideos] = useState([]);
@@ -13,7 +14,7 @@ export default function VideosPage() {
 
   const fetchVideos = async () => {
     try {
-      const res = await fetch("/api/videos");
+      const res = await fetch(`${API_BASE_URL}/api/videos`);
       const data = await res.json();
       setVideos(data);
     } catch (error) {

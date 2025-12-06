@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import LeaderboardRow from "@/components/leaderboard/LeaderboardRow";
 import { Button } from "@/components/ui/button";
+import { API_BASE_URL } from "@/lib/api-config";
 
 interface Leader {
   _id: string;
@@ -18,7 +19,7 @@ export default function LeaderboardPage() {
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        const res = await fetch("/api/leaderboard");
+        const res = await fetch(`${API_BASE_URL}/api/leaderboard`);
         const data = await res.json();
         setLeaders(data);
       } catch (error) {

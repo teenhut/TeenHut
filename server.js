@@ -5,7 +5,9 @@ const http = require("http");
 const { Server } = require("socket.io");
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
+const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
+const cors = require("cors");
 
 const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
@@ -91,9 +93,21 @@ const User = mongoose.models.User || mongoose.model("User", userSchema);
 app.prepare().then(() => {
   const server = express();
   const httpServer = http.createServer(server);
-  const io = new Server(httpServer);
+  const io = new Server(httpServer, {
+    cors: {
+      origin: process.env.FRONTEND_URL || "*", // Allow Vercel frontend
+      methods: ["GET", "POST"],
+      credentials: true,
+    },
+  });
 
   server.use(express.json());
+  server.use(
+    cors({
+      origin: process.env.FRONTEND_URL || "*", // Allow Vercel frontend
+      credentials: true,
+    })
+  );
 
   // Cloudinary Configuration
   const cloudinary = require("cloudinary").v2;

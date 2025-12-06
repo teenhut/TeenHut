@@ -1,7 +1,9 @@
 "use client";
-import { Analytics } from "@vercel/analytics/next"
+import { Analytics } from "@vercel/analytics/next";
+import { API_BASE_URL } from "@/lib/api-config";
 import ParticleBackground from "@/components/ui/ParticleBackground";
 import { motion } from "framer-motion";
+
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import VideoCard from "@/components/video/VideoCard";
@@ -25,7 +27,7 @@ export default function Home() {
   useEffect(() => {
     const fetchHypes = async () => {
       try {
-        const res = await fetch("/api/hypes");
+        const res = await fetch(`${API_BASE_URL}/api/hypes`);
         const contentType = res.headers.get("content-type");
         if (res.ok && contentType && contentType.includes("application/json")) {
           const data = await res.json();
@@ -43,7 +45,7 @@ export default function Home() {
 
     const fetchLongVideos = async () => {
       try {
-        const res = await fetch("/api/videos");
+        const res = await fetch(`${API_BASE_URL}/api/videos`);
         const contentType = res.headers.get("content-type");
         if (res.ok && contentType && contentType.includes("application/json")) {
           const data = await res.json();

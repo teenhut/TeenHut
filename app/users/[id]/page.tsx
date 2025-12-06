@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Play, Heart, MessageCircle, User } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import { API_BASE_URL } from "@/lib/api-config";
 
 interface Hype {
   _id: string;
@@ -58,7 +59,7 @@ export default function PublicProfilePage() {
 
   const fetchProfile = async () => {
     try {
-      const res = await fetch(`/api/users/${id}`);
+      const res = await fetch(`${API_BASE_URL}/api/users/${id}`);
       if (res.ok) {
         const data = await res.json();
         setProfile(data);
@@ -70,7 +71,7 @@ export default function PublicProfilePage() {
 
   const fetchHypes = async () => {
     try {
-      const res = await fetch(`/api/hypes?creatorId=${id}`);
+      const res = await fetch(`${API_BASE_URL}/api/hypes?creatorId=${id}`);
       const data = await res.json();
       setHypes(data);
     } catch (error) {
@@ -90,7 +91,7 @@ export default function PublicProfilePage() {
     setIsFollowing((prev) => !prev);
 
     try {
-      await fetch(`/api/users/${id}/follow`, {
+      await fetch(`${API_BASE_URL}/api/users/${id}/follow`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ currentUserId: currentUser.id }),

@@ -8,6 +8,7 @@ import { Loader2, ThumbsUp, MessageSquare, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
 import { useAuth } from "@/context/AuthContext";
+import { API_BASE_URL } from "@/lib/api-config";
 
 interface Video {
   _id: string;
@@ -46,14 +47,18 @@ export default function VideoDetailPage() {
       // Actually, let's try to see if we can add a specific endpoint or just fetch all.
       // Fetching all is inefficient but works for MVP.
 
-      const res = await fetch(`/api/hypes?userId=${user?.id || ""}`);
+      const res = await fetch(
+        `${API_BASE_URL}/api/hypes?userId=${user?.id || ""}`
+      );
       if (res.ok) {
         const data = await res.json();
         const foundVideo = data.find((v: Video) => v._id === params.id);
         if (foundVideo) {
           setVideo(foundVideo);
           // Increment view count
-          fetch(`/api/hypes/${params.id}/view`, { method: "POST" });
+          fetch(`${API_BASE_URL}/api/hypes/${params.id}/view`, {
+            method: "POST",
+          });
         }
       }
     } catch (error) {
@@ -65,7 +70,7 @@ export default function VideoDetailPage() {
 
   const fetchRelatedVideos = async () => {
     try {
-      const res = await fetch("/api/hypes");
+      const res = await fetch(`${API_BASE_URL}/api/hypes`);
       if (res.ok) {
         const data = await res.json();
         // Filter for other videos
@@ -89,7 +94,7 @@ export default function VideoDetailPage() {
     setVideo({ ...video, isLiked: newIsLiked, likes: newLikes });
 
     try {
-      await fetch(`/api/hypes/${video._id}/like`, {
+      await fetch(`${API_BASE_URL}/api/hypes/${video._id}/like`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: user.id }),
@@ -105,15 +110,18 @@ export default function VideoDetailPage() {
     if (!user || !video || !commentText.trim()) return;
 
     try {
-      const res = await fetch(`/api/hypes/${video._id}/comment`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          text: commentText,
-          author: user.username,
-          userId: user.id,
-        }),
-      });
+      const res = await fetch(
+        `${API_BASE_URL}/api/hypes/${video._id}/comment`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            text: commentText,
+            author: user.username,
+            userId: user.id,
+          }),
+        }
+      );
 
       if (res.ok) {
         const newComment = await res.json();
