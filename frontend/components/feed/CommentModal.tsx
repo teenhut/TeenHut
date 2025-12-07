@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { X, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { API_BASE_URL } from "@/lib/api-config";
 
 interface Comment {
   text: string;
@@ -38,7 +39,7 @@ export default function CommentModal({
 
   const fetchComments = async () => {
     try {
-      const res = await fetch(`/api/hypes/${hypeId}/comments`);
+      const res = await fetch(`${API_BASE_URL}/api/hypes/${hypeId}/comments`);
       if (res.ok) {
         const data = await res.json();
         setComments(data);
@@ -58,7 +59,7 @@ export default function CommentModal({
       const author = "You";
 
       console.log("Posting comment to:", `/api/hypes/${hypeId}/comment`);
-      const res = await fetch(`/api/hypes/${hypeId}/comment`, {
+      const res = await fetch(`${API_BASE_URL}/api/hypes/${hypeId}/comment`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: newComment, author }),

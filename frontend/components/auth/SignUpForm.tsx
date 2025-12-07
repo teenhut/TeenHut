@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
+import { API_BASE_URL } from "@/lib/api-config";
 
 export default function SignUpForm() {
   const [role, setRole] = useState("creator");
@@ -23,7 +24,7 @@ export default function SignUpForm() {
   const handleSignUp = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch("/api/signup", {
+      const res = await fetch(`${API_BASE_URL}/api/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, username, password, role }),
@@ -52,7 +53,7 @@ export default function SignUpForm() {
   const handleVerify2FA = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch("/api/verify-2fa", {
+      const res = await fetch(`${API_BASE_URL}/api/verify-2fa`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, code: twoFactorCode }),

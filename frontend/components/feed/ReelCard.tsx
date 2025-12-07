@@ -16,6 +16,7 @@ import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import CommentModal from "./CommentModal";
 import { useAuth } from "@/context/AuthContext";
+import { API_BASE_URL } from "@/lib/api-config";
 
 interface ReelCardProps {
   id: string;
@@ -62,7 +63,9 @@ export default function ReelCard({
   // Track View
   useEffect(() => {
     if (isActive && !viewTrackedRef.current && id) {
-      fetch(`/api/hypes/${id}/view`, { method: "POST" }).catch(console.error);
+      fetch(`${API_BASE_URL}/api/hypes/${id}/view`, { method: "POST" }).catch(
+        console.error
+      );
       viewTrackedRef.current = true;
     }
   }, [isActive, id]);
@@ -96,7 +99,7 @@ export default function ReelCard({
     setLikes((prev) => (newIsLiked ? prev + 1 : prev - 1));
 
     try {
-      await fetch(`/api/hypes/${id}/like`, {
+      await fetch(`${API_BASE_URL}/api/hypes/${id}/like`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: user.id }),
@@ -138,7 +141,7 @@ export default function ReelCard({
     setIsFollowing((prev) => !prev);
 
     try {
-      const res = await fetch(`/api/users/${creatorId}/follow`, {
+      const res = await fetch(`${API_BASE_URL}/api/users/${creatorId}/follow`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ currentUserId: user.id }),

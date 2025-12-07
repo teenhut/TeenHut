@@ -1,0 +1,26 @@
+﻿[dotenv@17.2.3] injecting env (7) from .env -- tip: ­ƒæÑ sync secrets across teammates & machines: https://dotenvx.com/ops
+node : [baseline-browser-mapping] The data 
+in this module is over two months old.  To 
+ensure accurate Baseline data, please 
+update: `npm i 
+baseline-browser-mapping@latest -D`
+At line:1 char:17
++ del server.log; node server.js > 
+server.log 2>&1
++                 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: 
+    ([baseline-brows...ping@latest -D`:Str  
+  ing) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommand 
+   Error
+ 
+---------------------------------------------------
+DEBUG: NODE_ENV is development
+DEBUG: MONGODB_URI is mongodb+srv://t...
+---------------------------------------------------
+> Ready on http://localhost:3000
+Connected to MongoDB Atlas
+Found 0 legacy hypes to migrate...
+Migration complete. Fixed 0 hypes.
+Email sent: 250 2.0.0 OK  1764773348 d9443c01a7336-29bceb54454sm187440745ad.84 - gsmtp

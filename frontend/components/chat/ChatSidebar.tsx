@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import NewChatModal from "./NewChatModal";
 import { useAuth } from "@/context/AuthContext";
+import { API_BASE_URL } from "@/lib/api-config";
 
 interface ChatSidebarProps {
   activeChat: string;
@@ -35,7 +36,9 @@ export default function ChatSidebar({
   const fetchConversations = async () => {
     if (!user) return;
     try {
-      const res = await fetch(`/api/conversations?userId=${user.id}`);
+      const res = await fetch(
+        `${API_BASE_URL}/api/conversations?userId=${user.id}`
+      );
       if (res.ok) {
         const data = await res.json();
         setConversations(data);

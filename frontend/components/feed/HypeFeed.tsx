@@ -6,6 +6,7 @@ import UploadModal from "@/components/upload/UploadModal";
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { API_BASE_URL } from "@/lib/api-config";
 
 interface Hype {
   _id: string;
@@ -42,7 +43,9 @@ export default function HypeFeed({ initialHypeId }: HypeFeedProps) {
 
   const fetchHypes = async () => {
     try {
-      const res = await fetch(`/api/hypes?userId=${user?.id || ""}`);
+      const res = await fetch(
+        `${API_BASE_URL}/api/hypes?userId=${user?.id || ""}`
+      );
       if (res.ok) {
         const data = await res.json();
         setHypes(data);
