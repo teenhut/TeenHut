@@ -28,6 +28,7 @@ interface UserProfile {
   };
   followersCount: number;
   followingCount: number;
+  profilePicture?: string;
 }
 
 export default function PublicProfilePage() {
