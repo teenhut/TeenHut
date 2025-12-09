@@ -122,10 +122,18 @@ export default function PublicProfilePage() {
         {/* Profile Header */}
         <div className="flex flex-col items-center mb-12">
           <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-teal-400 to-blue-500 p-[3px] mb-4">
-            <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
-              <span className="text-4xl font-bold text-primary uppercase">
-                {profile.username[0]}
-              </span>
+            <div className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
+              {profile.profilePicture ? (
+                <img
+                  src={profile.profilePicture}
+                  alt={profile.username}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-4xl font-bold text-primary uppercase">
+                  {profile.username[0]}
+                </span>
+              )}
             </div>
           </div>
 

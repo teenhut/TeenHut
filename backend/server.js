@@ -975,8 +975,14 @@ app.get("/api/hypes/:id/comments", async (req, res) => {
 // Get Hypes Endpoint
 app.get("/api/hypes", async (req, res) => {
   try {
-    const { userId } = req.query;
-    const hypes = await Hype.find()
+    const { userId, creatorId } = req.query;
+
+    const query = {};
+    if (creatorId) {
+      query.creatorId = creatorId;
+    }
+
+    const hypes = await Hype.find(query)
       .sort({ createdAt: -1 })
       .limit(20)
       .populate("creatorId", "username profilePicture")
