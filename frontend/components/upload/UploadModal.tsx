@@ -26,10 +26,13 @@ export default function UploadModal({
   const [uploadTitle, setUploadTitle] = useState("");
   const [uploadDescription, setUploadDescription] = useState("");
   const [isUploading, setIsUploading] = useState(false);
+  const [duration, setDuration] = useState<number>(0);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!isOpen) return null;
+
+  const isLongVideo = duration > 60; // 60 seconds threshold
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -62,6 +65,20 @@ export default function UploadModal({
     const reader = new FileReader();
     reader.onloadend = () => {
       setFilePreview(reader.result as string);
+
+      // Calculate duration for videos
+      if (file.type.startsWith("video")) {
+        const video = document.createElement("video");
+        video.preload = "metadata";
+        video.onloadedmetadata = function () {
+          window.URL.revokeObjectURL(video.src);
+          setDuration(video.duration);
+        };
+        video.src = URL.createObjectURL(file);
+      } else {
+        setDuration(0);
+      }
+
       setStep(2);
     };
     reader.readAsDataURL(file);
@@ -72,13 +89,34 @@ export default function UploadModal({
 
     setIsUploading(true);
     const formData = new FormData();
-    formData.append("file", uploadFile);
-    formData.append("title", uploadTitle);
-    formData.append("author", user?.username || "Anonymous");
-    formData.append("userId", user?.id || "");
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/hypes`, {
+      let url = `${API_BASE_URL}/api/hypes`;
+
+      if (isLongVideo) {
+        // Upload as Long Video
+        url = `${API_BASE_URL}/api/videos/upload`;
+        formData.append("video", uploadFile);
+        formData.append("title", uploadTitle);
+        formData.append("description", uploadDescription);
+        formData.append("userId", user?.id || "");
+
+        // Format duration to mm:ss
+        const mins = Math.floor(duration / 60);
+        const secs = Math.floor(duration % 60);
+        const formattedDuration = `${mins}:${secs.toString().padStart(2, "0")}`;
+        formData.append("duration", formattedDuration);
+
+        // Note: We don't have a thumbnail here, backend should handle it or we could generate one
+      } else {
+        // Upload as Hype
+        formData.append("file", uploadFile);
+        formData.append("title", uploadTitle);
+        formData.append("author", user?.username || "Anonymous");
+        formData.append("userId", user?.id || "");
+      }
+
+      const res = await fetch(url, {
         method: "POST",
         body: formData,
       });
@@ -86,6 +124,9 @@ export default function UploadModal({
       if (res.ok) {
         onUploadSuccess();
         resetUpload();
+        if (isLongVideo) {
+          alert("Video uploaded to 'Videos' section successfully!");
+        }
       } else {
         alert("Upload failed. Please try again.");
       }
@@ -104,6 +145,7 @@ export default function UploadModal({
     setUploadTitle("");
     setUploadDescription("");
     setIsUploading(false);
+    setDuration(0);
     onClose();
   };
 
@@ -113,7 +155,11 @@ export default function UploadModal({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h2 className="text-xl font-bold">
-            {step === 1 ? "Upload videos" : `${uploadTitle || "Draft"}`}
+            {step === 1
+              ? "Upload"
+              : isLongVideo
+              ? "Upload Long Video"
+              : "Upload Hype"}
           </h2>
           <div className="flex items-center gap-4">
             <Button
@@ -147,7 +193,7 @@ export default function UploadModal({
                 Drag and drop video files to upload
               </h3>
               <p className="text-gray-500 text-sm mb-8">
-                Your videos will be private until you publish them.
+                Videos under 60s will be Hypes. Longer videos will be in Videos.
               </p>
 
               <Button
@@ -189,7 +235,7 @@ export default function UploadModal({
                 <div className="space-y-2">
                   <div className="border border-gray-300 rounded-md px-3 py-2 bg-white focus-within:border-primary transition-colors h-40">
                     <label className="text-xs text-gray-500 block mb-1">
-                      Description
+                      Description {isLongVideo ? "" : "(Optional for Hypes)"}
                     </label>
                     <textarea
                       value={uploadDescription}
@@ -227,9 +273,9 @@ export default function UploadModal({
 
                 <div className="space-y-4">
                   <div className="flex justify-between text-sm text-gray-500">
-                    <span>Video Link</span>
-                    <span className="text-blue-600 cursor-pointer">
-                      https://teenhut.com/v/...
+                    <span>Destination</span>
+                    <span className="font-bold text-primary">
+                      {isLongVideo ? "Videos Section" : "Hypes Feed"}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm text-gray-500">
@@ -238,6 +284,12 @@ export default function UploadModal({
                       {uploadFile?.name}
                     </span>
                   </div>
+                  {isLongVideo && (
+                    <div className="p-2 bg-yellow-100 text-yellow-800 text-xs rounded">
+                      Info: This video is longer than 60s, so it will be saved
+                      to Videos.
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
