@@ -32,6 +32,7 @@ interface ReelCardProps {
   isGlobalMuted?: boolean;
   onToggleGlobalMute?: () => void;
   authorProfilePicture?: string;
+  creatorId?: string;
 }
 
 export default function ReelCard({
