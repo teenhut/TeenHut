@@ -31,7 +31,7 @@ interface ReelCardProps {
   isActive?: boolean;
   isGlobalMuted?: boolean;
   onToggleGlobalMute?: () => void;
-  creatorId?: string; // Added creatorId prop
+  authorProfilePicture?: string;
 }
 
 export default function ReelCard({
@@ -48,6 +48,7 @@ export default function ReelCard({
   isGlobalMuted = true,
   onToggleGlobalMute,
   creatorId,
+  authorProfilePicture,
 }: ReelCardProps) {
   const [likes, setLikes] = useState(initialLikes);
   const [commentsCount, setCommentsCount] = useState(initialComments.length);
@@ -297,8 +298,16 @@ export default function ReelCard({
         <div className="absolute left-0 bottom-0 right-16 p-6 z-30 text-white">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-teal-400 to-blue-500 p-[2px]">
-              <div className="w-full h-full rounded-full bg-primary flex items-center justify-center font-bold text-sm">
-                {author[0]}
+              <div className="w-full h-full rounded-full bg-primary flex items-center justify-center font-bold text-sm overflow-hidden">
+                {authorProfilePicture ? (
+                  <img
+                    src={authorProfilePicture}
+                    alt={author}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  author[0]
+                )}
               </div>
             </div>
             <Link

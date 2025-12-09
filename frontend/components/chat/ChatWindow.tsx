@@ -15,6 +15,7 @@ interface Message {
   mediaType?: "image" | "video" | "file";
   sender: "me" | "other";
   senderName?: string;
+  senderProfilePicture?: string;
   timestamp: Date;
   isEdited?: boolean;
   replyTo?: {
@@ -58,40 +59,47 @@ export default function ChatWindow({ chatId }: { chatId: string }) {
   useEffect(() => {
     if (!socket || !user) return;
 
+    // Clear previous messages when switching rooms
+    setMessages([]);
+
     // Send object with room and userId for validation
     socket.emit("join-room", { room: chatId, userId: user.id });
 
     const handleHistory = (historyMessages: any[]) => {
-      const formattedMessages = historyMessages.map((msg) => ({
-        id: msg._id,
-        text: decryptMessage(msg.text),
-        mediaUrl: msg.mediaUrl,
-        mediaType: msg.mediaType,
-        sender: (msg.senderId === user?.id ? "me" : "other") as "me" | "other",
-        senderName: msg.senderName,
-        timestamp: new Date(msg.timestamp),
-        isEdited: msg.isEdited,
-        replyTo: msg.replyTo,
-        reactions: msg.reactions || [],
-      }));
+      const formattedMessages = historyMessages.map((msg) => {
+        // Handle populated senderId
+        const senderIdString =
+          typeof msg.senderId === "object" ? msg.senderId._id : msg.senderId;
+        const senderProfilePicture =
+          typeof msg.senderId === "object"
+            ? msg.senderId.profilePicture
+            : undefined;
+
+        return {
+          id: msg._id,
+          text: decryptMessage(msg.text),
+          mediaUrl: msg.mediaUrl,
+          mediaType: msg.mediaType,
+          sender: (senderIdString === user?.id ? "me" : "other") as
+            | "me"
+            | "other",
+          senderName: msg.senderName,
+          senderProfilePicture,
+          timestamp: new Date(msg.timestamp),
+          isEdited: msg.isEdited,
+          replyTo: msg.replyTo,
+          reactions: msg.reactions || [],
+        };
+      });
       setMessages(formattedMessages);
     };
 
     const handleMessage = (msg: any) => {
+      // Filter out messages from other rooms if received
+      if (msg.room && msg.room !== chatId) return;
+
       // Don't duplicate if we already have it (e.g. from optimistic update)
-      // Actually, we should probably rely on server echo for ID consistency or just append
-      // For now, simple append if not from "me" or if we want to confirm receipt
-
-      // If we use optimistic updates, we might see double.
-      // Let's assume server broadcast includes sender.
-      // If sender is me, we might have already added it.
-      // But we need the real ID from DB.
-
-      // Simple approach: Replace optimistic message or just ignore if from me?
-      // Better: Just append everything from server and remove optimistic one?
-      // Or: Only append if sender !== me.
-
-      if (msg.senderId === user?.id) return; // Skip my own echo if I added it optimistically
+      if (msg.senderId === user?.id) return;
 
       const decryptedText = decryptMessage(msg.text);
       setMessages((prev) => [
@@ -103,6 +111,7 @@ export default function ChatWindow({ chatId }: { chatId: string }) {
           mediaType: msg.mediaType,
           sender: "other",
           senderName: msg.senderName,
+          senderProfilePicture: msg.senderProfilePicture,
           timestamp: new Date(msg.timestamp),
           replyTo: msg.replyTo,
           reactions: msg.reactions || [],
@@ -139,6 +148,7 @@ export default function ChatWindow({ chatId }: { chatId: string }) {
     socket.on("message-reacted", handleMessageReacted);
 
     return () => {
+      socket.emit("leave-room", chatId);
       socket.off("history", handleHistory);
       socket.off("message", handleMessage);
       socket.off("message-updated", handleMessageUpdated);
@@ -293,10 +303,27 @@ export default function ChatWindow({ chatId }: { chatId: string }) {
             } mb-4 group relative`}
           >
             <div
-              className={`flex items-center gap-2 max-w-[80%] ${
+              className={`flex items-end gap-2 max-w-[80%] ${
                 msg.sender === "me" ? "flex-row" : "flex-row"
               }`}
             >
+              {/* Avatar for Other */}
+              {msg.sender === "other" && (
+                <div className="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden mb-1">
+                  {msg.senderProfilePicture ? (
+                    <img
+                      src={msg.senderProfilePicture}
+                      alt={msg.senderName}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-xs font-bold text-gray-500">
+                      {msg.senderName?.[0]}
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Dots Menu for "Me" (Left side) */}
               {msg.sender === "me" && (
                 <div className="relative opacity-0 group-hover:opacity-100 transition-opacity">

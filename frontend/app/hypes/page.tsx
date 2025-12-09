@@ -12,7 +12,9 @@ interface Hype {
   _id: string;
   title: string;
   author: string;
-  creatorId: string; // Added creatorId
+  creatorId:
+    | string
+    | { _id: string; username: string; profilePicture?: string }; // Added creatorId
   mediaUrl: string;
   mediaType: "image" | "video";
   xp: number;
@@ -119,29 +121,39 @@ export default function HypesPage() {
             </Button>
           </div>
         ) : (
-          hypes.map((item) => (
-            <div
-              key={item._id}
-              className="hype-card snap-center"
-              data-id={item._id}
-            >
-              <ReelCard
-                id={item._id}
-                title={item.title}
-                author={item.author}
-                creatorId={item.creatorId}
-                xp={item.xp}
-                mediaUrl={item.mediaUrl}
-                mediaType={item.mediaType}
-                initialLikes={item.likes}
-                initialIsLiked={item.isLiked}
-                initialComments={item.comments}
-                isActive={item._id === activeHypeId}
-                isGlobalMuted={isGlobalMuted}
-                onToggleGlobalMute={toggleGlobalMute}
-              />
-            </div>
-          ))
+          hypes.map((item) => {
+            const creator =
+              typeof item.creatorId === "object" ? item.creatorId : null;
+            const creatorIdString = creator
+              ? creator._id
+              : (item.creatorId as string);
+            const profilePicture = creator?.profilePicture;
+
+            return (
+              <div
+                key={item._id}
+                className="hype-card snap-center"
+                data-id={item._id}
+              >
+                <ReelCard
+                  id={item._id}
+                  title={item.title}
+                  author={item.author}
+                  creatorId={creatorIdString}
+                  authorProfilePicture={profilePicture}
+                  xp={item.xp}
+                  mediaUrl={item.mediaUrl}
+                  mediaType={item.mediaType}
+                  initialLikes={item.likes}
+                  initialIsLiked={item.isLiked}
+                  initialComments={item.comments}
+                  isActive={item._id === activeHypeId}
+                  isGlobalMuted={isGlobalMuted}
+                  onToggleGlobalMute={toggleGlobalMute}
+                />
+              </div>
+            );
+          })
         )}
       </div>
 

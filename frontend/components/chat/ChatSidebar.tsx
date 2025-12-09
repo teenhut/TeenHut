@@ -64,6 +64,12 @@ export default function ChatSidebar({
     return other?.username || "Unknown User";
   };
 
+  const getConversationImage = (conv: any) => {
+    if (conv.isGroup) return null;
+    const other = conv.participants.find((p: any) => p._id !== user?.id);
+    return other?.profilePicture;
+  };
+
   return (
     <div className="w-full md:w-64 bg-gray-50 flex-shrink-0 p-4 border-r border-gray-200 h-full flex flex-col">
       <div className="flex-1 overflow-y-auto space-y-6">
@@ -98,26 +104,39 @@ export default function ChatSidebar({
             </h2>
           </div>
           <div className="space-y-1">
-            {conversations.map((conv) => (
-              <button
-                key={conv._id}
-                onClick={() => onSelectChat(conv._id)}
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-sm ${
-                  activeChat === conv._id
-                    ? "bg-primary text-white"
-                    : "text-gray-600 hover:bg-gray-200 hover:text-primary"
-                }`}
-              >
-                <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0 text-gray-500 font-bold text-xs">
-                  {getConversationName(conv)[0]?.toUpperCase()}
-                </div>
-                <div className="flex-1 text-left truncate">
-                  <div className="font-medium truncate">
-                    {getConversationName(conv)}
+            {conversations.map((conv) => {
+              const image = getConversationImage(conv);
+              return (
+                <button
+                  key={conv._id}
+                  onClick={() => onSelectChat(conv._id)}
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-sm ${
+                    activeChat === conv._id
+                      ? "bg-primary text-white"
+                      : "text-gray-600 hover:bg-gray-200 hover:text-primary"
+                  }`}
+                >
+                  <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    {image ? (
+                      <img
+                        src={image}
+                        alt="Profile"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-gray-500 font-bold text-xs">
+                        {getConversationName(conv)[0]?.toUpperCase()}
+                      </span>
+                    )}
                   </div>
-                </div>
-              </button>
-            ))}
+                  <div className="flex-1 text-left truncate">
+                    <div className="font-medium truncate">
+                      {getConversationName(conv)}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>

@@ -22,7 +22,7 @@ export default function VideoCard({
   duration = "0:00",
 }: VideoCardProps) {
   return (
-    <Link href={`/videos/${id}`} className="group block">
+    <Link href={`/hypes/${id}`} className="group block">
       <div className="flex flex-col gap-3">
         {/* Thumbnail Container */}
         <div className="relative aspect-video rounded-xl overflow-hidden bg-gray-100">

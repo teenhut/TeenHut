@@ -780,7 +780,7 @@ app.get("/api/conversations", async (req, res) => {
     const conversations = await Conversation.find({
       participants: userId,
     })
-      .populate("participants", "username")
+      .populate("participants", "username profilePicture")
       .sort({ updatedAt: -1 });
 
     res.json(conversations);
@@ -849,7 +849,7 @@ app.post(
 app.get("/api/videos", async (req, res) => {
   try {
     const videos = await Video.find()
-      .populate("uploader", "username")
+      .populate("uploader", "username profilePicture")
       .sort({ createdAt: -1 });
     res.json(videos);
   } catch (error) {
@@ -862,7 +862,10 @@ app.get("/api/videos", async (req, res) => {
 app.get("/api/videos/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const video = await Video.findById(id).populate("uploader", "username");
+    const video = await Video.findById(id).populate(
+      "uploader",
+      "username profilePicture"
+    );
     if (!video) return res.status(404).json({ error: "Video not found" });
     res.json(video);
   } catch (error) {
@@ -973,7 +976,11 @@ app.get("/api/hypes/:id/comments", async (req, res) => {
 app.get("/api/hypes", async (req, res) => {
   try {
     const { userId } = req.query;
-    const hypes = await Hype.find().sort({ createdAt: -1 }).limit(20).lean();
+    const hypes = await Hype.find()
+      .sort({ createdAt: -1 })
+      .limit(20)
+      .populate("creatorId", "username profilePicture")
+      .lean();
 
     const hypesWithLikeStatus = hypes.map((hype) => ({
       ...hype,
@@ -1087,6 +1094,11 @@ io.on("connection", (socket) => {
     console.log("Client disconnected:", socket.id);
   });
 
+  socket.on("leave-room", (room) => {
+    socket.leave(room);
+    console.log(`Socket ${socket.id} left room ${room}`);
+  });
+
   socket.on("join-room", async (data) => {
     // Handle both string (legacy/public) and object (private) payloads
     let room = data;
@@ -1138,7 +1150,8 @@ io.on("connection", (socket) => {
     try {
       const messages = await Message.find({ room })
         .sort({ timestamp: 1 })
-        .limit(50);
+        .limit(50)
+        .populate("senderId", "username profilePicture");
       socket.emit("history", messages);
     } catch (error) {
       console.error("Error fetching history:", error);
@@ -1163,10 +1176,12 @@ io.on("connection", (socket) => {
       await newMessage.save();
 
       // Update User Stats (Messages)
+      let senderProfilePicture = "";
       if (data.userId) {
         const user = await User.findById(data.userId);
         if (user) {
           user.stats.messagesSent += 1;
+          senderProfilePicture = user.profilePicture;
           await user.save();
           await checkChallenges(user);
         }
@@ -1174,11 +1189,13 @@ io.on("connection", (socket) => {
 
       io.in(data.room).emit("message", {
         id: newMessage._id,
+        room: data.room, // Include room in payload
         text: newMessage.text,
         mediaUrl: newMessage.mediaUrl,
         mediaType: newMessage.mediaType,
         senderId: newMessage.senderId,
         senderName: newMessage.senderName,
+        senderProfilePicture, // Include profile picture
         timestamp: newMessage.timestamp,
         replyTo: newMessage.replyTo,
         reactions: [],
