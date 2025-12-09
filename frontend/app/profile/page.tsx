@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Play, Flame, Heart, MessageCircle } from "lucide-react";
+import { Play, Flame, Heart, MessageCircle, Edit2 } from "lucide-react";
 import UploadModal from "@/components/upload/UploadModal";
+import EditProfileModal from "@/components/profile/EditProfileModal";
 import Link from "next/link";
 
 import { useAuth } from "@/context/AuthContext";
@@ -21,6 +22,7 @@ interface Hype {
 export default function ProfilePage() {
   const { user } = useAuth();
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showEditProfileModal, setShowEditProfileModal] = useState(false);
   const [hypes, setHypes] = useState<Hype[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -44,7 +46,7 @@ export default function ProfilePage() {
   return (
     <main className="min-h-screen bg-white text-primary font-sans">
       <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-end mb-8">
+        <div className="flex flex-col items-end mb-8 gap-4">
           <div className="bg-primary/5 border border-primary/10 rounded-xl p-4 text-right">
             <div className="font-bold text-xl mb-1">
               ★ Credits: {user?.credits || 0} XP
@@ -55,11 +57,34 @@ export default function ProfilePage() {
               Hypes & helping others
             </div>
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+            onClick={() => setShowEditProfileModal(true)}
+          >
+            <Edit2 className="w-4 h-4" /> Edit Profile
+          </Button>
         </div>
 
-        <h1 className="text-4xl font-bold text-center mb-8 tracking-tight">
-          Profile
-        </h1>
+        <div className="flex flex-col items-center justify-center mb-8">
+          <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-gray-100 bg-gray-100 mb-4">
+            {user?.profilePicture ? (
+              <img
+                src={user.profilePicture}
+                alt={user.username}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-400 text-3xl font-bold">
+                {user?.username?.[0]?.toUpperCase() || "U"}
+              </div>
+            )}
+          </div>
+          <h1 className="text-4xl font-bold text-center tracking-tight">
+            {user?.username || "Profile"}
+          </h1>
+        </div>
 
         <div className="flex justify-center gap-4 mb-12">
           <Button className="bg-primary text-white hover:bg-primary/90 px-8 font-bold rounded-full">
@@ -142,6 +167,15 @@ export default function ProfilePage() {
         onClose={() => setShowUploadModal(false)}
         onUploadSuccess={() => {
           fetchHypes(); // Refresh list
+        }}
+      />
+
+      <EditProfileModal
+        isOpen={showEditProfileModal}
+        onClose={() => setShowEditProfileModal(false)}
+        onUpdateSuccess={() => {
+          // User context updates automatically inside modal via login()
+          // But we can add a toast or other side effects here
         }}
       />
     </main>

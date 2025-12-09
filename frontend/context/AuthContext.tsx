@@ -1,20 +1,4 @@
 "use client";
-
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-
-interface User {
-  id: string;
-  username: string;
-  email: string;
-  credits: number;
-  streak: number;
-  stats: {
-    commentsMade: number;
-    hypesUploaded: number;
-    likesGiven: number;
-    messagesSent: number;
-  };
   completedChallenges: string[];
 }
 

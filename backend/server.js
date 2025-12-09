@@ -82,6 +82,7 @@ const userSchema = new mongoose.Schema({
   email: { type: String, unique: true, required: true },
   username: { type: String, required: true },
   password: { type: String, required: true },
+  profilePicture: { type: String }, // User Profile Picture
   isVerified: { type: Boolean, default: false },
   credits: { type: Number, default: 0 },
   streak: { type: Number, default: 0 },
@@ -477,6 +478,7 @@ app.post("/api/login", async (req, res) => {
       id: user._id,
       email: user.email,
       username: user.username,
+      profilePicture: user.profilePicture, // Include profile picture in login response
       credits: user.credits,
       streak: user.streak,
       isVerified: user.isVerified,
@@ -538,6 +540,7 @@ app.post("/api/verify-2fa", async (req, res) => {
         id: user._id,
         email: user.email,
         username: user.username,
+        profilePicture: user.profilePicture,
         credits: user.credits,
         streak: user.streak,
         isVerified: true,
@@ -556,7 +559,7 @@ app.get("/api/users/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const user = await User.findById(id).select(
-      "username credits streak stats followers following"
+      "username profilePicture credits streak stats followers following"
     );
 
     if (!user) {
@@ -566,6 +569,7 @@ app.get("/api/users/:id", async (req, res) => {
     res.json({
       id: user._id,
       username: user.username,
+      profilePicture: user.profilePicture,
       credits: user.credits,
       streak: user.streak,
       stats: user.stats,
@@ -575,6 +579,58 @@ app.get("/api/users/:id", async (req, res) => {
   } catch (error) {
     console.error("Fetch user error:", error);
     res.status(500).json({ error: "Failed to fetch user" });
+  }
+});
+
+// Update User Profile Endpoint
+app.put("/api/users/:id", upload.single("profilePicture"), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { username, password } = req.body;
+
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Update Profile Picture
+    if (req.file) {
+      const b64 = Buffer.from(req.file.buffer).toString("base64");
+      const dataURI = "data:" + req.file.mimetype + ";base64," + b64;
+
+      const result = await cloudinary.uploader.upload(dataURI, {
+        resource_type: "image",
+        folder: "teenhut_profiles",
+      });
+      user.profilePicture = result.secure_url;
+    }
+
+    // Update Username
+    if (username && username.trim() !== "") {
+      user.username = username;
+    }
+
+    // Update Password
+    if (password && password.trim() !== "") {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      user.password = hashedPassword;
+    }
+
+    await user.save();
+
+    res.json({
+      id: user._id,
+      email: user.email,
+      username: user.username,
+      profilePicture: user.profilePicture, // Return new PFP
+      credits: user.credits,
+      streak: user.streak,
+      stats: user.stats,
+      isVerified: user.isVerified,
+    });
+  } catch (error) {
+    console.error("Update user error:", error);
+    res.status(500).json({ error: "Failed to update profile" });
   }
 });
 
